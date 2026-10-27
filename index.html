@@ -178,6 +178,10 @@
         <input id="digestionRateInput" type="number" min="0" max="5" step="0.25" value="1" inputmode="decimal" aria-label="Digestion points per ten seconds">
         <button id="changeDigestionRateButton" type="button">Change rate</button>
       </div>
+      <button id="instaChurnButton" class="danger hidden" type="button">
+        Insta-Churn
+      </button>
+      <p class="muted">Instantly snuffs the prey out.</p>
     </section>
 
     <section class="panel hidden" id="gameOverPanel" aria-live="assertive">
@@ -468,6 +472,10 @@ function renderGame() {
   document.getElementById("chatInput").disabled = hasFinished;
   document.getElementById("sendBtn").disabled = hasFinished;
   document.getElementById("nextChamberControl").classList.toggle("hidden", !(active && !isInitiator && Number(state.chamberIndex) === 0));
+  document.getElementById("instaChurnButton").classList.toggle(
+    "hidden",
+    !(active && !isInitiator && Number(state.chamberIndex) === 1)
+  );
 
   const endContainer = document.getElementById("endButtonContainer");
   endContainer.replaceChildren();
@@ -645,6 +653,57 @@ async function changeDigestionRate() {
     if (result.committed && result.snapshot.val()) await addSystemMessage(result.snapshot.val().lastActionMessage);
     else setStatus("The digestion rate could not be changed because the session is no longer active.");
   } catch (error) { console.error(error); setStatus("Could not change digestion rate. Check Firebase permissions."); }
+}
+
+async function instaChurn() {
+  if (isInitiator || !gameStateRef) return;
+
+  const now = getServerNow();
+
+  try {
+    const result = await gameStateRef.transaction(current => {
+      // Only Fhyra can use this during Chamber 2.
+      if (
+        !current ||
+        current.status !== "active" ||
+        Number(current.chamberIndex) !== 1 ||
+        !ROUTES[current.routeId]
+      ) {
+        return;
+      }
+
+      const next = advanceState(current, now);
+
+      // Preserve an earlier game over if one has already occurred.
+      if (next.status !== "active") return next;
+
+      next.digestion = 100;
+      next.status = "gameover";
+      next.gameOverCause = "digestion";
+      next.gameOverText = ROUTES[next.routeId].endings;
+      next.gameOverAt = now;
+      next.updatedAt = now;
+      next.lastTickAt = now;
+      next.lastActionMessage = "Fhyra insta-churned the prey, those powerful walls collapsing around their weakened body, snuffing them out with a wet, unceremonious *crnch~*.";
+
+      return next;
+    });
+
+    const finalState = result.snapshot && result.snapshot.val();
+
+    if (result.committed && finalState && finalState.status === "gameover") {
+      stopTickLoop();
+
+      if (finalState.gameOverCause === "digestion") {
+        await addSystemMessage(finalState.lastActionMessage);
+      }
+    } else {
+      setStatus("Insta-Churn is only available in Chamber 2.");
+    }
+  } catch (error) {
+    console.error("Insta-Churn failed:", error);
+    setStatus("Could not use Insta-Churn. Check your connection.");
+  }
 }
 
 async function endSession() {
@@ -1016,6 +1075,7 @@ function restoreSavedSession() {
  document.getElementById("chatInput").addEventListener("keydown", event => { if (event.key === "Enter") sendMessage(); });
  document.getElementById("extraTributeStartButton").addEventListener("click", startExtraTributeDraw);
  document.getElementById("confirmExtraTributeButton").addEventListener("click", confirmExtraTribute);
+ document.getElementById("instaChurnButton").addEventListener("click", instaChurn);
 
 window.addEventListener("load", async () => {
   try {
