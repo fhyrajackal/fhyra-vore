@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#100713">
-<title>Fhyra's Preything Trials</title>
+<title>Devoured on a Whim: Fhyra's Preything</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -83,22 +83,22 @@
 </head>
 <body>
 <div class="page">
-  <h1>Fhyra's Preything Trials</h1>
-  <p class="subtitle">A shared dark-fantasy survival session</p>
+  <h1>Fulfill the real purpose of your existence as my squirmy toy to digest~</h1>
+  <p class="subtitle">Your entire life has been leading up to this moment. Serving and worshiping the Goddess in pure devotion before I make you disappear like the little snack you were always meant to be.</p>
 
   <section id="mainMenu" class="panel controls">
-    <h2>Begin a new trial</h2>
-    <p class="muted">Choose a username for the tiny preything. A name added to The Digested cannot be registered again.</p>
+    <h2>Offer yourself as tribute</h2>
+    <p class="muted">Choose a username for the doomed morsel. A name added to The Digested cannot be used again.</p>
     <input id="initiatorNameInput" maxlength="40" autocomplete="nickname" placeholder="Preything username" aria-label="Preything username">
-    <div><button id="initiateButton" type="button">Start a new trial</button></div>
-    <div class="muted" style="margin:.45rem 0">or return to a trial as Fhyra's plaything</div>
+    <div><button id="initiateButton" type="button">Start a new sacrifice</button></div>
+    <div class="muted" style="margin:.45rem 0">or return to an open sacrifice as Fhyra's plaything</div>
     <input id="roomInput" maxlength="32" autocapitalize="none" autocomplete="off" placeholder="32-character room code" aria-label="Room code">
-    <div><button id="rejoinButton" class="secondary" type="button">Rejoin as preything</button></div>
-    <p class="muted">The initiator's room code is for recovery. Fhyra joins through the private invitation link sent by email.</p>
+    <div><button id="rejoinButton" class="secondary" type="button">Rejoin, prey</button></div>
+    <p class="muted">Use the room code to rejoin an open session, or switch between devices.</p>
     <hr style="border:0;border-top:1px solid var(--border);margin:1rem 0">
     <h2>The Digested:</h2>
-    <p class="muted">Names here have reached zero health or 100 digestion and may not start another trial.</p>
-    <p id="digestedEmpty" class="muted">No preythings have been digested yet.</p>
+    <p class="muted">Names shown here have been fully churned away forever, never to be seen again.</p>
+    <p id="digestedEmpty" class="muted">No preythings have been permavored yet.</p>
     <ul id="digestedList" aria-live="polite"></ul>
   </section>
 
@@ -119,34 +119,34 @@
     </div>
 
     <div class="panel scene" aria-live="polite">
-      <h2 id="sceneHeading">Between the Goddess's fingers</h2>
-      <p id="sceneText">A tiny preything is held delicately between Fhyra's fingers. The next route is entirely in the Goddess's hands.</p>
+      <h2 id="sceneHeading">Held between the Goddess's fingers</h2>
+      <p id="sceneText">The fragile little food thing is held delicately, yet assertively, between Fhyra's fingers. Its achievements, ambitions, titles, its hopes and dreams... Everything has changed now that you've been so casually plucked up like the quick bite you are for the perfect goddess voraciously licking her lips at you. Never breaking eye contact. Amused. Enjoying your heart rate so adorably spike as she decides how to best use you, break you, ruin you, digest you... for her self-indulgent cravings.</p>
     </div>
     <div id="status" role="status" aria-live="polite"></div>
 
     <section class="panel hidden" id="routePanel">
-      <h2>Choose the route</h2>
-      <p class="muted">Fhyra chooses the first chamber. The second chamber drains health and stamina faster and begins increasing digestion.</p>
+      <h2>How to devour my prey toy~</h2>
+      <p class="muted">Fhyra will choose your fate. No matter how she decides to use your inferior existence for her hedonistic pleasures, she will first toy with you and then your health and stamina will begin to break down faster, as digestion kicks in..</p>
       <div class="route-grid">
         <button type="button" onclick="selectRoute('oral')">Oral Vore<small>Maw → Stomach</small></button>
         <button type="button" onclick="selectRoute('anal')">Anal Vore<small>Intestines → Stomach</small></button>
-        <button type="button" onclick="selectRoute('cock')">Cock Vore<small>Down the urethra → Ballsack</small></button>
+        <button type="button" onclick="selectRoute('cock')">Cock Vore<small>Urethra → Ballsack</small></button>
         <button type="button" onclick="selectRoute('unbirth')">Unbirth<small>Nethers → Womb</small></button>
       </div>
     </section>
 
     <section class="panel hidden" id="chamberPanel">
-      <h2 id="chamberTitle">Current chamber</h2>
+      <h2 id="chamberTitle">Current predicament</h2>
       <p id="chamberDescription" class="muted"></p>
       <div id="nextChamberControl" class="hidden" style="text-align:center">
-        <button id="nextChamberButton" type="button">Advance to the second chamber</button>
-        <p class="muted">The second chamber raises the drain rate and slowly increases digestion.</p>
+        <button id="nextChamberButton" type="button">Swallow fully</button>
+        <p class="muted">Sentence the preything to its fate through the perfection of the goddess' biology.</p>
       </div>
     </section>
 
     <section class="panel hidden" id="initiatorActions">
       <h2>What will you do?</h2>
-      <p class="muted">Struggle spends a d20 stamina roll to protect health for 2d20 seconds. Worship protects stamina for 1d20 seconds. The actions do not stack and share a 30-second cooldown.</p>
+      <p class="muted">Struggle spends a d20 stamina roll to protect health for [2d20]s. Worship protects stamina for [1d20]s. They do not stack and share a 30s cooldown.</p>
       <div class="split">
         <button id="struggleButton" type="button" class="danger">Struggle</button>
         <button id="worshipButton" type="button" class="good">Worship</button>
@@ -156,13 +156,13 @@
 
     <section class="panel hidden" id="joinerControls">
       <h2>Fhyra's control</h2>
-      <p class="muted">Offer the preything some reprieve at any time, or adjust digestion's pace.</p>
+      <p class="muted">Offer the preything some reprieve at any time to reward them or extend their suffering, or adjust digestion's pace.</p>
       <div class="split">
         <button id="restoreHealthButton" class="good" type="button">Give +20 health</button>
         <button id="restoreStaminaButton" class="good" type="button">Give +20 stamina</button>
       </div>
       <hr style="border:0;border-top:1px solid var(--border);margin:.8rem 0">
-      <label for="digestionRateInput" class="muted">Digestion rate (points per 10 seconds; 0–5)</label>
+      <label for="digestionRateInput" class="muted">Digestion rate (points per 10s; 0–5)</label>
       <div class="inline-row" style="margin-top:.4rem">
         <input id="digestionRateInput" type="number" min="0" max="5" step="0.25" value="1" inputmode="decimal" aria-label="Digestion points per ten seconds">
         <button id="changeDigestionRateButton" type="button">Change rate</button>
@@ -172,13 +172,13 @@
     <section class="panel hidden" id="gameOverPanel" aria-live="assertive">
       <h2 id="gameOverTitle">GAME OVER</h2>
       <p id="gameOverEnding"></p>
-      <p id="joinerGameOverMessage" class="hidden">You, the real goddess, casually permavored another little food thing to briefly sate your hedonistic whims.</p>
+      <p id="joinerGameOverMessage" class="hidden">You, the real goddess, have casually permavored another little morsel to briefly sate your hedonistic whims.</p>
       <p class="muted">This preything has been added to The Digested list.</p>
     </section>
 
     <section class="panel" id="extraTributeSection">
       <h2>Extra tribute</h2>
-      <p>Pay tribute to either beg for your life, or show gratitude for the privilege of serving as Fhyra's preything.</p>
+      <p>Pay tribute to either beg for your life, or show gratitude for the privilege of serving as Fhyra's food toy.</p>
       <button id="extraTributeStartButton" type="button">Roll extra tribute</button>
       <p id="extraTributeHint" class="muted hidden">The amount will roll for a moment before the payment links appear.</p>
       <p id="extraTributeJoinerLabel" class="muted hidden">Waiting for extra tribute...</p>
@@ -204,8 +204,8 @@
 
     <section class="panel hidden" id="endSection">
       <h2 id="endHeading">Session ended</h2>
-      <p id="endMessage" class="muted">Fhyra has ended the trial.</p>
-      <p class="muted">The joiner can reset the room for both participants or return to the main menu after the reset.</p>
+      <p id="endMessage" class="muted">Fhyra has finished eating you, food.</p>
+      <p class="muted">Fhyra can reset the room for both participants or return to the main menu.</p>
     </section>
   </section>
 </div>
@@ -236,10 +236,10 @@ const ACTIVE_SESSION_KEY = "fhyraPreything.activeSession.v1";
 const EXTRA_TRIBUTE_SPIN_MS = 2400;
 const MAX_STAT = 100;
 const ROUTES = {
-  oral: { name: "Oral Vore", chambers: ["Maw", "Stomach"], endings: "You're nothing but an unrecognizable remnant, lost to the Goddess's depths." },
-  anal: { name: "Anal Vore", chambers: ["Intestines", "Stomach"], endings: "You're nothing but a forgotten mound of divine dust and bone." },
-  cock: { name: "Cock Vore", chambers: ["Down the urethra", "Ballsack"], endings: "You're nothing but a spent spark, swallowed by primordial heat." },
-  unbirth: { name: "Unbirth", chambers: ["Nethers", "Womb"], endings: "You're nothing but a fading trace in the primordial cradle." }
+  oral: { name: "Oral Vore", chambers: ["Maw", "Stomach"], endings: "You're nothing but an unrecognizable slurry of sludgey chyme sloughing through the goddess' bowels, approaching the end of your journey within the all-devouring depths of her digestive system." },
+  anal: { name: "Anal Vore", chambers: ["Intestines", "Stomach"], endings: "Your undignified epilogue sees you exiting the perfection of the goddess' bowels having been repurposed into nothing but a wasted, lifeless mound of shit mixed with speckles of bone of what had once been a sentient being." },
+  cock: { name: "Cock Vore", chambers: ["Urethra", "Ballsack"], endings: "Your entire existence has been reduced to nothing but a wasted load of steaming cum, nutsludge spent in thick ropes left forgotten, used for a quick climax for the goddess to unwind to." },
+  unbirth: { name: "Unbirth", chambers: ["Nethers", "Womb"], endings: "You're nothing but a bed-ruining puddle of primordial nectar, having been melted together with your mind and soul within the overwhelmingly pheromonal confines of my innermost sanctum." }
 };
 
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -431,7 +431,7 @@ function renderGame() {
   document.getElementById("gameArea").classList.toggle("hidden", !hasRoom);
   if (!hasRoom) return;
 
-  document.getElementById("roleLabel").textContent = isInitiator ? "Role: tiny preything" : "Role: Fhyra — the Goddess";
+  document.getElementById("roleLabel").textContent = isInitiator ? "Role: Fhyra's preything" : "Role: Fhyra — the Goddess";
   document.getElementById("usernameLabel").textContent = isInitiator ? `Preything: ${initiatorName}` : `Current preything: ${normalizeUsername(gameState && gameState.victimUsername) || initiatorName || "Unknown"}`;
   const state = gameState || newGameState(initiatorName || "Preything");
   const hp = clamp(Number(state.hp) || 0, 0, 100);
@@ -480,33 +480,33 @@ function renderGame() {
   if (waiting) {
     document.getElementById("sceneHeading").textContent = "Between the Goddess's fingers";
     document.getElementById("sceneText").textContent = isInitiator
-      ? "A tiny preything rests between Fhyra's fingers. The world is enormous from here; wait for the Goddess to choose a route."
-      : `You hold ${normalizeUsername(state.victimUsername) || "your tiny preything"} delicately between two fingers. Choose a route to begin the trial.`;
-    document.getElementById("chamberTitle").textContent = "Choose the first chamber";
+      ? "A tiny preything rests between Fhyra's fingers. The world is enormous from here; wait for the Goddess to choose your fate."
+      : `You hold ${normalizeUsername(state.victimUsername) || "your tiny preything"} delicately, yet assertively, between two fingers. How shall I amuse myself with this snack~?`;
+    document.getElementById("chamberTitle").textContent = "Choose their fate";
   } else if (active && route) {
     const chamberName = route.chambers[Math.min(1, Math.max(0, Number(state.chamberIndex)))];
     document.getElementById("sceneHeading").textContent = `${route.name}: ${chamberName}`;
     document.getElementById("sceneText").textContent = Number(state.chamberIndex) === 0
-      ? `The first chamber slowly sips away health and stamina. Fhyra alone decides when to advance to ${route.chambers[1]}.`
-      : `Inside ${chamberName}, health and stamina drain faster. Digestion now rises by ${Number(state.digestionRatePer10s ?? 1)} point(s) every 10 seconds while the trial continues.`;
+      ? `The first of the prey's predicaments slowly sips away health and stamina. Fhyra alone decides when to swallow the prey towards ${route.chambers[1]}.`
+      : `Inside ${chamberName}, health and stamina drain faster. Digestion now rises by ${Number(state.digestionRatePer10s ?? 1)} point(s) every 10s within the depths of the goddess' biology.`;
     document.getElementById("chamberTitle").textContent = `${route.name} — Chamber ${Number(state.chamberIndex) + 1}: ${chamberName}`;
     document.getElementById("chamberDescription").textContent = Number(state.chamberIndex) === 0
-      ? "Chamber I: health drains 1.8 points per minute and stamina drains 9 points per minute. No digestion progress occurs here."
-      : `Chamber II: health drains 6 points per minute and stamina drains 24 points per minute. Digestion rises at the rate chosen by Fhyra.`;
+      ? "Chamber I: health drains at 1.8/min and stamina drains at 9/min. The prey's not being digested... yet."
+      : `Chamber II: health drains at 6/min and stamina drains 24/min. Digestion rises at whichever rate Fhyra fancies.`;
   } else if (gameover) {
     document.getElementById("sceneHeading").textContent = "GAME OVER";
     document.getElementById("sceneText").textContent = state.gameOverCause === "digestion"
-      ? "The digestion meter has reached 100%. The trial is over."
-      : "Health has reached zero. The trial is over.";
-    document.getElementById("gameOverEnding").textContent = state.gameOverText || (route ? route.endings : "The trial has ended.");
+      ? "The digestion meter has reached 100%. The preything has been churned up."
+      : "Health has reached zero. The food thing has died.";
+    document.getElementById("gameOverEnding").textContent = state.gameOverText || (route ? route.endings : "Fhyra has eaten you.");
     document.getElementById("joinerGameOverMessage").classList.toggle("hidden", isInitiator);
     document.getElementById("endHeading").textContent = "GAME OVER";
     document.getElementById("endMessage").textContent = "The username has been added to The Digested.";
   } else if (ended) {
     document.getElementById("sceneHeading").textContent = "Session ended";
-    document.getElementById("sceneText").textContent = "Fhyra ended the trial before a game-over condition was reached.";
+    document.getElementById("sceneText").textContent = "Fhyra might have just spared your soul from eternal digestion... for now.";
     document.getElementById("endHeading").textContent = "Session ended";
-    document.getElementById("endMessage").textContent = "This trial ended without adding the preything to The Digested.";
+    document.getElementById("endMessage").textContent = "Fhyra has digested you away... but might have just spared your soul from eternal digestion... for now~";
   }
 
   const now = getServerNow();
@@ -563,9 +563,9 @@ async function advanceChamber() {
       if (!current || current.status !== "active" || current.chamberIndex !== 0 || !current.routeId) return;
       const advanced = advanceState(current, now);
       if (advanced.status !== "active") return advanced;
-      return { ...advanced, chamberIndex: 1, lastTickAt: now, updatedAt: now, lastActionMessage: `Fhyra advanced the trial to ${ROUTES[current.routeId].chambers[1]}.` };
+      return { ...advanced, chamberIndex: 1, lastTickAt: now, updatedAt: now, lastActionMessage: `Fhyra swallows you further towards ${ROUTES[current.routeId].chambers[1]}.` };
     });
-    if (result.committed && result.snapshot.val() && result.snapshot.val().chamberIndex === 1) await addSystemMessage("Fhyra advanced to the second chamber. Digestion has begun.");
+    if (result.committed && result.snapshot.val() && result.snapshot.val().chamberIndex === 1) await addSystemMessage("You're fully engulfed within the goddess' endless hunger. Digestion has begun.");
   } catch (error) { console.error(error); setStatus("Could not advance chambers. Check your connection."); }
 }
 
@@ -594,7 +594,7 @@ async function useAbility(type) {
       advanced.updatedAt = now;
       return advanced;
     });
-    if (!result.committed) setStatus("Your action is cooling down. Struggle and worship cannot overlap.");
+    if (!result.committed) setStatus("Your action is cooling down.");
     else if (result.snapshot.val() && result.snapshot.val().lastActionMessage) await addSystemMessage(result.snapshot.val().lastActionMessage);
   } catch (error) { console.error(error); setStatus("Could not use that action. Check your connection."); }
 }
@@ -610,7 +610,7 @@ async function restoreStat(stat) {
       next[stat] = Math.min(MAX_STAT, Number(next[stat]) + 20);
       next.updatedAt = now;
       next.lastTickAt = now;
-      next.lastActionMessage = `Fhyra restored 20 ${stat === "hp" ? "health" : "stamina"}.`;
+      next.lastActionMessage = `Fhyra generously restored your ${stat === "hp" ? "health" : "stamina"}.`;
       return next;
     });
     if (result.committed && result.snapshot.val()) await addSystemMessage(result.snapshot.val().lastActionMessage);
@@ -633,7 +633,7 @@ async function changeDigestionRate() {
       next.digestionRatePer10s = rate;
       next.lastTickAt = now;
       next.updatedAt = now;
-      next.lastActionMessage = `Fhyra changed digestion to ${rate} point(s) per 10 seconds.`;
+      next.lastActionMessage = `Fhyra changed digestion to ${rate} point(s) per 10s.`;
       return next;
     });
     if (result.committed && result.snapshot.val()) await addSystemMessage(result.snapshot.val().lastActionMessage);
@@ -658,7 +658,7 @@ async function endSession() {
       setStatus("The game-over scene has already triggered.");
       return;
     }
-    if (result.committed) { stopTickLoop(); await addSystemMessage("Fhyra ended the trial."); }
+    if (result.committed) { stopTickLoop(); await addSystemMessage("Fhyra has digested you."); }
   } catch (error) { console.error(error); setStatus("Could not end the session. Check your connection."); }
 }
 
@@ -777,7 +777,7 @@ async function confirmExtraTribute() {
       if (!Number.isFinite(currentAmount) || currentAmount < 25 || currentAmount > 250 || currentAmount % 5 !== 0) return;
       return { ...current, status: "confirmed", confirmedAt: getServerNow(), confirmedBy: "Fhyra" };
     });
-    if (result.committed) setStatus(`Extra tribute of $${amount.toFixed(2)} confirmed. Thank you, Fhyra!`);
+    if (result.committed) setStatus(`Extra tribute of $${amount.toFixed(2)} confirmed.`);
     else { button.disabled = false; setStatus("This extra tribute has already been confirmed or replaced."); }
   } catch (error) { console.error(error); button.disabled = false; setStatus("Could not confirm the extra tribute. Check your connection."); }
 }
@@ -881,7 +881,7 @@ async function initiateSession() {
     const joinLink = `${JOIN_BASE_URL}?invite=${encodeURIComponent(inviteToken)}`;
     const emailConfigured = ![EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, GODDESS_EMAIL_ADDRESS].some(v => !v || v.includes("PASTE_") || v.includes("YOUR_EMAIL"));
     if (!emailConfigured) {
-      setStatus("Trial created. Email is not configured yet; complete the EmailJS setup steps below before inviting Fhyra.");
+      setStatus("Sacrifice session created. Email is not configured yet; complete the EmailJS setup steps below before inviting Fhyra.");
       return;
     }
     try {
@@ -892,14 +892,14 @@ async function initiateSession() {
         room_code: code,
         initiator_username: name
       });
-      setStatus("Invitation email sent — waiting for Fhyra to join.");
+      setStatus("Invitation email sent — waiting for Fhyra to devour you.");
     } catch (error) {
       console.error("Invitation email failed:", error);
-      setStatus("Trial created, but the invitation email failed. Check the EmailJS service, template and allowed domain.");
+      setStatus("Session created, but the invitation email failed. Check the EmailJS service, template and allowed domain.");
     }
   } catch (error) {
-    console.error("Could not create a trial:", error);
-    setStatus(error && error.message ? error.message : "Could not create trial. Check Firebase setup and permissions.");
+    console.error("Could not create a session:", error);
+    setStatus(error && error.message ? error.message : "Could not create session. Check Firebase setup and permissions.");
   }
 }
 
@@ -943,12 +943,12 @@ async function rejoinAsInitiator() {
     const ref = db.ref("rooms/" + code);
     const [ownerSnap, stateSnap, resetSnap] = await Promise.all([ref.child("initiatorName").once("value"), ref.child("gameState").once("value"), ref.child("resetAt").once("value")]);
     const owner = normalizeUsername(ownerSnap.val());
-    if (!owner || !stateSnap.exists()) throw new Error("No trial exists for that room code.");
-    if (Number(resetSnap.val()) > 0) throw new Error("That trial has already been reset.");
+    if (!owner || !stateSnap.exists()) throw new Error("No session exists for that room code.");
+    if (Number(resetSnap.val()) > 0) throw new Error("That session has already been reset.");
     attachRoom(code, "initiator", owner);
     document.getElementById("roomInput").value = "";
-    setStatus("Rejoined the trial as the preything.");
-  } catch (error) { console.error(error); setStatus(error.message || "Could not rejoin the trial."); }
+    setStatus("Rejoined the session as the preything.");
+  } catch (error) { console.error(error); setStatus(error.message || "Could not rejoin the session."); }
 }
 
 function copyCode() {
