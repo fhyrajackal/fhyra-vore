@@ -502,7 +502,9 @@ function renderGame() {
     document.getElementById("sceneText").textContent = state.gameOverCause === "digestion"
       ? "The digestion meter has reached 100%. The preything has been churned up."
       : "Health has reached zero. The food thing has died.";
-    document.getElementById("gameOverEnding").textContent = state.gameOverText || (route ? route.endings : "Fhyra has eaten you.");
+    const routeEnding = ROUTES[state.routeId]?.endings;
+    document.getElementById("gameOverEnding").textContent =
+      routeEnding || state.gameOverText || "Fhyra has eaten you.";
     document.getElementById("joinerGameOverMessage").classList.toggle("hidden", isInitiator);
     document.getElementById("endHeading").textContent = "GAME OVER";
     document.getElementById("endMessage").textContent = "The username has been added to The Digested.";
