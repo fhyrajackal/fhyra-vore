@@ -139,6 +139,13 @@
       </div>
     </section>
 
+    <section id="chatBox" class="panel chat">
+      <h2>Private chat</h2>
+      <div id="messages" aria-live="polite"></div>
+      <div id="chatRow"><input id="chatInput" type="text" maxlength="1000" placeholder="Type a message..." autocomplete="off" aria-label="Chat message"><button id="sendBtn" type="button">Send</button></div>
+      <p class="muted">Messages display the sender's username. Chat becomes read-only after the session ends.</p>
+    </section>
+
     <section class="panel hidden" id="chamberPanel">
       <h2 id="chamberTitle">Current predicament</h2>
       <p id="chamberDescription" class="muted"></p>
@@ -197,13 +204,6 @@
         <button id="confirmExtraTributeButton" class="gold hidden" type="button">Confirm tribute received</button>
         <p id="extraTributeNote" class="muted">The joiner should confirm only after the displayed amount has been received.</p>
       </div>
-    </section>
-
-    <section id="chatBox" class="panel chat">
-      <h2>Private chat</h2>
-      <div id="messages" aria-live="polite"></div>
-      <div id="chatRow"><input id="chatInput" type="text" maxlength="1000" placeholder="Type a message..." autocomplete="off" aria-label="Chat message"><button id="sendBtn" type="button">Send</button></div>
-      <p class="muted">Messages display the sender's username. Chat becomes read-only after the session ends.</p>
     </section>
 
     <section class="panel hidden" id="endSection">
