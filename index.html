@@ -484,7 +484,7 @@ function renderGame() {
   if (waiting) {
     document.getElementById("sceneHeading").textContent = "Between the Goddess's fingers";
     document.getElementById("sceneText").textContent = isInitiator
-      ? "A tiny preything anxiously rests between Fhyra's fingers. Her natural warmth washes over you, the superiority of her presence overwhelms your instincts; wait for the Goddess to choose your fate. Your achievements, ambitions, titles, its hopes and dreams... Everything has turned meaningless now that you've been so casually plucked up like the quick bite you are for the perfect goddess voraciously licking her lips at you. Never breaking eye contact. Amused. Enjoying your heart rate so adorably spike as she decides how to best use you, break you, ruin you, digest you... for her self-indulgent cravings."
+      ? "A tiny preything anxiously rests between Fhyra's fingers. Her natural warmth washes over you, the superiority of her presence overwhelms your instincts; you can only wait for the Goddess to choose your fate. Your achievements, ambitions, titles, yours hopes and dreams... Everything has turned meaningless now that you've been so casually plucked up like the quick bite you are for the perfect goddess voraciously licking her lips at you. Never breaking eye contact. Amused. Enjoying your heart rate so adorably spike as she decides how to best use you, break you, ruin you, digest you... for her self-indulgent cravings."
       : `You hold ${normalizeUsername(state.victimUsername) || "your tiny preything"} delicately, yet assertively, between two fingers. How shall I amuse myself with this snack~?`;
     document.getElementById("chamberTitle").textContent = "Choose their fate";
   } else if (active && route) {
@@ -824,10 +824,25 @@ function attachRoom(code, role, name) {
     joinerPresenceRef.onDisconnect().remove().then(() => joinerPresenceRef.set(true)).catch(error => console.warn("Presence update failed", error));
   }
   gameStateRef.on("value", snapshot => {
-    gameState = snapshot.val() && typeof snapshot.val() === "object" ? snapshot.val() : null;
+    gameState = snapshot.val() && typeof snapshot.val() === "object"
+      ? snapshot.val()
+      : null;
+
+    if (gameState && gameState.status === "ended") {
+      setStatus("Session Ended");
+    } else if (joinerHasJoined || (gameState && gameState.status === "active")) {
+      setStatus("Session in progress");
+    }
+
     renderGame();
-    if (gameState && gameState.status === "gameover") recordDigestedUsername(gameState);
-  }, error => { console.error(error); setStatus("Could not load game state. Check Firebase database permissions."); });
+
+    if (gameState && gameState.status === "gameover") {
+      recordDigestedUsername(gameState);
+    }
+  }, error => {
+    console.error(error);
+    setStatus("Could not load game state. Check Firebase database permissions.");
+  });
   messagesQuery.on("child_added", snapshot => {
     const message = snapshot.val();
     if (message && typeof message.text === "string") addMessage(message.text, String(message.sender || "Unknown"));
