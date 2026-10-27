@@ -178,10 +178,15 @@
         <input id="digestionRateInput" type="number" min="0" max="5" step="0.25" value="1" inputmode="decimal" aria-label="Digestion points per ten seconds">
         <button id="changeDigestionRateButton" type="button">Change rate</button>
       </div>
-      <button id="instaChurnButton" class="danger hidden" type="button">
-        Insta-Churn
+      <div class="split">
+        <button id="clenchButton" class="danger hidden" type="button">
+          Clench
       </button>
-      <p class="muted">Instantly snuffs the prey out.</p>
+        <button id="instaChurnButton" class="danger hidden" type="button">
+          Insta-Churn
+      </button>
+    </div>
+    <p class="muted">Clench: -20 HP and +10% digestion. Insta-Churn: instantly snuffs the prey out..</p>
     </section>
 
     <section class="panel hidden" id="gameOverPanel" aria-live="assertive">
@@ -476,6 +481,10 @@ function renderGame() {
     "hidden",
     !(active && !isInitiator && Number(state.chamberIndex) === 1)
   );
+  document.getElementById("clenchButton").classList.toggle(
+    "hidden",
+    !(active && !isInitiator && Number(state.chamberIndex) === 1)
+  );
 
   const endContainer = document.getElementById("endButtonContainer");
   endContainer.replaceChildren();
@@ -703,6 +712,66 @@ async function instaChurn() {
   } catch (error) {
     console.error("Insta-Churn failed:", error);
     setStatus("Could not use Insta-Churn. Check your connection.");
+  }
+}
+
+async function clench() {
+  if (isInitiator || !gameStateRef) return;
+
+  const now = getServerNow();
+  const actionMessage =
+    "Fhyra clenched hard~ The little food thing strains under the increased pressure, the noises of digestion growing ominously more active.";
+
+  try {
+    const result = await gameStateRef.transaction(current => {
+      if (
+        !current ||
+        current.status !== "active" ||
+        Number(current.chamberIndex) !== 1 ||
+        !ROUTES[current.routeId]
+      ) {
+        return;
+      }
+
+      const next = advanceState(current, now);
+
+      // Don't apply Clench if time advancement already caused Game Over.
+      if (next.status !== "active") return next;
+
+      next.hp = Math.max(0, Number(next.hp) - 20);
+      next.digestion = Math.min(100, Number(next.digestion) + 10);
+
+      next.lastTickAt = now;
+      next.updatedAt = now;
+      next.lastActionMessage = actionMessage;
+
+      if (next.hp <= 0 || next.digestion >= 100) {
+        next.status = "gameover";
+        next.gameOverCause = next.hp <= 0 ? "health" : "digestion";
+        next.gameOverText = ROUTES[next.routeId].endings;
+        next.gameOverAt = now;
+      }
+
+      return next;
+    });
+
+    const finalState = result.snapshot && result.snapshot.val();
+
+    if (result.committed && finalState) {
+      if (finalState.lastActionMessage === actionMessage) {
+        await addSystemMessage(actionMessage);
+      }
+
+      if (finalState.status === "gameover") {
+        stopTickLoop();
+        await recordDigestedUsername(finalState);
+      }
+    } else {
+      setStatus("Clench is only available in Chamber 2.");
+    }
+  } catch (error) {
+    console.error("Clench failed:", error);
+    setStatus("Could not use Clench. Check your connection.");
   }
 }
 
@@ -1076,6 +1145,7 @@ function restoreSavedSession() {
  document.getElementById("extraTributeStartButton").addEventListener("click", startExtraTributeDraw);
  document.getElementById("confirmExtraTributeButton").addEventListener("click", confirmExtraTribute);
  document.getElementById("instaChurnButton").addEventListener("click", instaChurn);
+ document.getElementById("clenchButton").addEventListener("click", clench);
 
 window.addEventListener("load", async () => {
   try {
