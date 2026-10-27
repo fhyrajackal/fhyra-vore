@@ -662,7 +662,11 @@ async function endSession() {
       setStatus("The game-over scene has already triggered.");
       return;
     }
-    if (result.committed) { stopTickLoop(); await addSystemMessage("Fhyra has digested you."); }
+    if (result.committed) {
+      stopTickLoop();
+      setStatus("Session Ended");
+      await addSystemMessage("Fhyra has digested you.");
+    }
   } catch (error) { console.error(error); setStatus("Could not end the session. Check your connection."); }
 }
 
@@ -882,7 +886,7 @@ async function initiateSession() {
     const inviteToken = generateToken();
     const tokenHash = await hashToken(inviteToken);
     const state = newGameState(name);
-    setStatus("Creating a new trial…");
+    setStatus("Creating a new session…");
     const updates = {};
     updates[`rooms/${code}/initiatorName`] = name;
     updates[`rooms/${code}/inviteTokenHash`] = tokenHash;
