@@ -130,7 +130,7 @@
 
     <section class="panel hidden" id="routePanel">
       <h2>How to devour my prey toy~</h2>
-      <p class="muted">Fhyra will choose your fate. No matter how she decides to use your inferior existence for her hedonistic pleasures, she will first toy with you and then your health and stamina will begin to break down faster, as digestion kicks in.</p>
+      <p class="muted">Fhyra will choose the preything's fate.</p>
       <div class="route-grid">
         <button type="button" onclick="selectRoute('oral')">Oral Vore<small>Maw → Stomach</small></button>
         <button type="button" onclick="selectRoute('anal')">Anal Vore<small>Intestines → Stomach</small></button>
@@ -484,14 +484,14 @@ function renderGame() {
   if (waiting) {
     document.getElementById("sceneHeading").textContent = "Between the Goddess's fingers";
     document.getElementById("sceneText").textContent = isInitiator
-      ? "A tiny preything anxiously rests between Fhyra's fingers. Her natural warmth washes over you, the superiority of her presence overwhelms your instincts; wait for the Goddess to choose your fate."
+      ? "A tiny preything anxiously rests between Fhyra's fingers. Her natural warmth washes over you, the superiority of her presence overwhelms your instincts; wait for the Goddess to choose your fate. Your achievements, ambitions, titles, its hopes and dreams... Everything has turned meaningless now that you've been so casually plucked up like the quick bite you are for the perfect goddess voraciously licking her lips at you. Never breaking eye contact. Amused. Enjoying your heart rate so adorably spike as she decides how to best use you, break you, ruin you, digest you... for her self-indulgent cravings."
       : `You hold ${normalizeUsername(state.victimUsername) || "your tiny preything"} delicately, yet assertively, between two fingers. How shall I amuse myself with this snack~?`;
     document.getElementById("chamberTitle").textContent = "Choose their fate";
   } else if (active && route) {
     const chamberName = route.chambers[Math.min(1, Math.max(0, Number(state.chamberIndex)))];
     document.getElementById("sceneHeading").textContent = `${route.name}: ${chamberName}`;
     document.getElementById("sceneText").textContent = Number(state.chamberIndex) === 0
-      ? `The first of the prey's predicaments slowly sips away health and stamina. Fhyra alone decides when to swallow the prey towards her ${route.chambers[1]}.`
+      ? `The first of the prey's predicaments slowly weakens you, tiring you out. You know it's futile, no matter how the goddess decides to use your inferior existence for her hedonistic pleasures, she will first toy with you and then your health and stamina will begin to break down faster, as digestion kicks in. Fhyra alone decides when to swallow the prey towards her ${route.chambers[1]}.`
       : `Inside the ${chamberName}, health and stamina drain faster. Digestion now rises by ${Number(state.digestionRatePer10s ?? 1)} point(s) every 10s within the depths of the goddess' biology.`;
     document.getElementById("chamberTitle").textContent = `${route.name} — Chamber ${Number(state.chamberIndex) + 1}: The ${chamberName}`;
     document.getElementById("chamberDescription").textContent = Number(state.chamberIndex) === 0
