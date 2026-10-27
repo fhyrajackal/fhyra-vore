@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#100713">
+<title>Fhyra's Preything Trials</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root { color-scheme: dark; --bg:#100713; --panel:rgba(27,10,30,.88); --border:rgba(198,115,209,.4); --pink:#f49adf; --purple:#bb8cf4; --muted:#c5a6c9; --red:#ff718b; --green:#81e7be; --gold:#f5d28b; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { min-height:100%; margin:0; }
+  body { font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#fff5ff; background:#100713; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; align-items:center; padding:1rem; padding-top:max(1rem,env(safe-area-inset-top)); padding-bottom:max(1rem,env(safe-area-inset-bottom)); padding-left:max(1rem,env(safe-area-inset-left)); padding-right:max(1rem,env(safe-area-inset-right)); overflow-x:hidden; }
+  body::before { content:""; position:fixed; inset:-25%; z-index:-2; background:radial-gradient(ellipse at 20% 20%,rgba(112,35,113,.45),transparent 45%),radial-gradient(ellipse at 80% 70%,rgba(98,22,72,.5),transparent 48%),radial-gradient(circle at 50% 50%,rgba(159,67,127,.12),transparent 50%); animation:drift 18s ease-in-out infinite alternate; }
+  @keyframes drift { from { transform:translate3d(-1%,0,0) scale(1); } to { transform:translate3d(1%,1%,0) scale(1.04); } }
+  h1 { font-size:clamp(1.5rem,6vw,2.2rem); font-weight:650; letter-spacing:.03em; text-align:center; margin:.2rem 0 .25rem; color:#ffe4ff; text-shadow:0 0 28px rgba(220,130,242,.3); }
+  .subtitle { color:var(--muted); text-align:center; margin:0 0 1rem; font-size:.9rem; }
+  .page { width:100%; max-width:760px; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:1rem; margin:.8rem 0; box-shadow:0 12px 34px rgba(0,0,0,.28),inset 0 0 24px rgba(110,38,120,.08); backdrop-filter:blur(8px); }
+  h2,h3 { margin:.1rem 0 .7rem; color:#f7c9f4; font-weight:650; }
+  h2 { font-size:1.1rem; } h3 { font-size:1rem; }
+  p { line-height:1.5; }
+  .muted { color:var(--muted); font-size:.88rem; }
+  .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
+  .stat { background:rgba(12,4,17,.7); border:1px solid rgba(204,140,221,.25); border-radius:14px; padding:.8rem .7rem; min-width:0; }
+  .stat-name { color:#d9b6e8; font-size:.77rem; letter-spacing:.08em; text-transform:uppercase; }
+  .stat-value { font-size:clamp(1.45rem,5vw,2.05rem); font-weight:800; margin:.15rem 0 .5rem; font-variant-numeric:tabular-nums; }
+  .hp .stat-value { color:#ff7e9e; } .stamina .stat-value { color:#8be5c0; } .digestion .stat-value { color:#e9b7ff; }
+  .meter { height:10px; background:#28152d; border-radius:99px; overflow:hidden; border:1px solid rgba(255,255,255,.08); }
+  .meter-fill { display:block; height:100%; width:0; border-radius:99px; transition:width .25s ease; }
+  #hpBar { background:linear-gradient(90deg,#a91f54,#ff87a3); } #staminaBar { background:linear-gradient(90deg,#13825d,#8be5c0); } #digestionBar { background:linear-gradient(90deg,#853bc1,#ef9fea); }
+  .scene { text-align:center; padding:1.1rem; background:linear-gradient(145deg,rgba(74,25,76,.44),rgba(18,7,22,.78)); }
+  #sceneHeading { font-size:1.25rem; color:#ffe1fc; margin:.1rem 0 .45rem; }
+  #sceneText { margin:0; color:#e5cbe9; line-height:1.6; }
+  #status { min-height:1.3rem; text-align:center; color:#efbce8; font-size:.9rem; margin:.45rem auto; overflow-wrap:anywhere; }
+  .controls { text-align:center; }
+  input,button,select { border:1px solid rgba(215,153,228,.35); border-radius:12px; min-height:48px; padding:.75rem .9rem; font:inherit; font-size:16px; }
+  input,select { background:rgba(12,4,17,.9); color:#fff5ff; width:min(100%,340px); margin:.25rem; }
+  input::placeholder { color:#a98aae; }
+  button { background:linear-gradient(135deg,#973b91,#63318c); color:white; font-weight:650; cursor:pointer; width:min(100%,300px); margin:.25rem; box-shadow:0 5px 16px rgba(0,0,0,.18); }
+  button:active { transform:scale(.985); } button:disabled { opacity:.42; filter:grayscale(.5); cursor:not-allowed; }
+  button.secondary { background:rgba(75,39,85,.75); } button.danger { background:linear-gradient(135deg,#9e2148,#6e173c); } button.good { background:linear-gradient(135deg,#23775d,#14543f); } button.gold { background:linear-gradient(135deg,#9b6d28,#68451d); }
+  .field { display:flex; justify-content:center; flex-wrap:wrap; align-items:center; gap:.3rem; }
+  .roomcode { font-family:ui-monospace,monospace; background:rgba(10,3,14,.8); border:1px solid var(--border); display:inline-block; padding:.4rem .7rem; border-radius:8px; overflow-wrap:anywhere; }
+  .route-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.45rem; }
+  .route-grid button { width:100%; min-height:78px; margin:0; }
+  .route-grid small { display:block; font-weight:450; opacity:.83; margin-top:.2rem; }
+  .split { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; }
+  .split button { width:100%; margin:.2rem 0; }
+  .inline-row { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:.35rem; }
+  .inline-row input { width:110px; flex:0 0 110px; margin:0; }
+  .inline-row button { width:auto; min-width:170px; margin:0; }
+  .chat { display:none; }
+  #messages { height:clamp(210px,34vh,350px); overflow-y:auto; -webkit-overflow-scrolling:touch; background:rgba(6,2,10,.48); border-radius:11px; padding:.6rem; margin-bottom:.6rem; }
+  .chat-message { padding:.45rem .6rem; border-radius:9px; background:rgba(100,46,106,.24); margin:.3rem 0; overflow-wrap:anywhere; white-space:pre-wrap; }
+  .chat-message.self { background:rgba(149,63,144,.3); text-align:right; }
+  .chat-message.system { color:var(--gold); font-style:italic; background:rgba(135,91,32,.12); }
+  #chatRow { display:flex; gap:.35rem; align-items:center; } #chatInput { flex:1; min-width:0; width:auto; margin:0; } #sendBtn { width:auto; min-width:78px; margin:0; }
+  #digestedList { display:flex; flex-wrap:wrap; justify-content:center; gap:.4rem; padding:0; margin:.6rem 0 0; list-style:none; }
+  #digestedList li { background:rgba(150,53,91,.18); border:1px solid rgba(225,113,165,.25); border-radius:999px; padding:.35rem .65rem; color:#f2c8df; font-size:.88rem; }
+  .warning { border-color:rgba(255,113,139,.55); }
+  .hidden { display:none !important; }
+  #extraTributeSection { display:none; }
+  #extraTributeAmount { font-size:clamp(2rem,9vw,3rem); font-weight:850; color:#ffc7f2; text-align:center; text-shadow:0 0 18px rgba(220,130,242,.25); }
+  #extraTributePaymentButtons { display:none; text-align:center; }
+  #extraTributePaymentButtons a { display:block; text-decoration:none; }
+  #extraTributePaymentButtons .pay-btn { background:#1268a6; } #extraTributePaymentButtons .throne-btn { background:#613cb1; }
+  #extraTributeStatus,#extraTributeNote { color:var(--muted); font-size:.85rem; text-align:center; }
+  #gameOverPanel { display:none; text-align:center; border-color:rgba(255,113,139,.7); }
+  #gameOverEnding { color:#ffb4c9; font-weight:750; font-size:1.1rem; }
+  #joinerGameOverMessage { color:#e7c9ff; margin:.5rem 0; }
+  #actionFeedback { color:var(--gold); text-align:center; font-size:.88rem; min-height:1.2rem; margin:.35rem 0; }
+  #roleLabel { display:inline-block; padding:.28rem .6rem; border-radius:999px; color:#e9c8f6; background:rgba(111,55,133,.25); font-size:.82rem; margin:.25rem 0 .5rem; }
+  @media(max-width:440px) { body { padding-left:.65rem; padding-right:.65rem; } .panel { padding:.8rem; border-radius:15px; } .stats { gap:.4rem; } .stat { padding:.65rem .5rem; } .route-grid { grid-template-columns:1fr; } .route-grid button { min-height:62px; } .stat-name { font-size:.7rem; } .stat-value { font-size:1.45rem; } }
+  @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Fhyra's Preything Trials</h1>
+  <p class="subtitle">A shared dark-fantasy survival session</p>
+
+  <section id="mainMenu" class="panel controls">
+    <h2>Begin a new trial</h2>
+    <p class="muted">Choose a username for the tiny preything. A name added to The Digested cannot be registered again.</p>
+    <input id="initiatorNameInput" maxlength="40" autocomplete="nickname" placeholder="Preything username" aria-label="Preything username">
+    <div><button id="initiateButton" type="button">Start a new trial</button></div>
+    <div class="muted" style="margin:.45rem 0">or return to a trial as Fhyra's plaything</div>
+    <input id="roomInput" maxlength="32" autocapitalize="none" autocomplete="off" placeholder="32-character room code" aria-label="Room code">
+    <div><button id="rejoinButton" class="secondary" type="button">Rejoin as preything</button></div>
+    <p class="muted">The initiator's room code is for recovery. Fhyra joins through the private invitation link sent by email.</p>
+    <hr style="border:0;border-top:1px solid var(--border);margin:1rem 0">
+    <h2>The Digested:</h2>
+    <p class="muted">Names here have reached zero health or 100 digestion and may not start another trial.</p>
+    <p id="digestedEmpty" class="muted">No preythings have been digested yet.</p>
+    <ul id="digestedList" aria-live="polite"></ul>
+  </section>
+
+  <section id="gameArea" class="hidden">
+    <div class="panel" id="roomDisplay" style="text-align:center">
+      <div id="roleLabel">Role</div>
+      <div class="muted">Room code — keep this private</div>
+      <p><span id="roomCode" class="roomcode"></span></p>
+      <button class="secondary" id="copyCodeButton" type="button">Copy room code</button>
+      <div class="muted" id="usernameLabel"></div>
+      <div class="field" style="margin-top:.45rem" id="endButtonContainer"></div>
+    </div>
+
+    <div class="panel stats" aria-label="Preything stats">
+      <div class="stat hp"><div class="stat-name">Health</div><div class="stat-value" id="hpValue">100</div><div class="meter"><span id="hpBar" class="meter-fill"></span></div></div>
+      <div class="stat stamina"><div class="stat-name">Stamina</div><div class="stat-value" id="staminaValue">100</div><div class="meter"><span id="staminaBar" class="meter-fill"></span></div></div>
+      <div class="stat digestion"><div class="stat-name">Digestion</div><div class="stat-value" id="digestionValue">0%</div><div class="meter"><span id="digestionBar" class="meter-fill"></span></div></div>
+    </div>
+
+    <div class="panel scene" aria-live="polite">
+      <h2 id="sceneHeading">Between the Goddess's fingers</h2>
+      <p id="sceneText">A tiny preything is held delicately between Fhyra's fingers. The next route is entirely in the Goddess's hands.</p>
+    </div>
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <section class="panel hidden" id="routePanel">
+      <h2>Choose the route</h2>
+      <p class="muted">Fhyra chooses the first chamber. The second chamber drains health and stamina faster and begins increasing digestion.</p>
+      <div class="route-grid">
+        <button type="button" onclick="selectRoute('oral')">Oral Vore<small>Maw → Stomach</small></button>
+        <button type="button" onclick="selectRoute('anal')">Anal Vore<small>Intestines → Stomach</small></button>
+        <button type="button" onclick="selectRoute('cock')">Cock Vore<small>Down the urethra → Ballsack</small></button>
+        <button type="button" onclick="selectRoute('unbirth')">Unbirth<small>Nethers → Womb</small></button>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="chamberPanel">
+      <h2 id="chamberTitle">Current chamber</h2>
+      <p id="chamberDescription" class="muted"></p>
+      <div id="nextChamberControl" class="hidden" style="text-align:center">
+        <button id="nextChamberButton" type="button">Advance to the second chamber</button>
+        <p class="muted">The second chamber raises the drain rate and slowly increases digestion.</p>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="initiatorActions">
+      <h2>What will you do?</h2>
+      <p class="muted">Struggle spends a d20 stamina roll to protect health for 2d20 seconds. Worship protects stamina for 1d20 seconds. The actions do not stack and share a 30-second cooldown.</p>
+      <div class="split">
+        <button id="struggleButton" type="button" class="danger">Struggle</button>
+        <button id="worshipButton" type="button" class="good">Worship</button>
+      </div>
+      <div id="actionFeedback" aria-live="polite"></div>
+    </section>
+
+    <section class="panel hidden" id="joinerControls">
+      <h2>Fhyra's control</h2>
+      <p class="muted">Offer the preything some reprieve at any time, or adjust digestion's pace.</p>
+      <div class="split">
+        <button id="restoreHealthButton" class="good" type="button">Give +20 health</button>
+        <button id="restoreStaminaButton" class="good" type="button">Give +20 stamina</button>
+      </div>
+      <hr style="border:0;border-top:1px solid var(--border);margin:.8rem 0">
+      <label for="digestionRateInput" class="muted">Digestion rate (points per 10 seconds; 0–5)</label>
+      <div class="inline-row" style="margin-top:.4rem">
+        <input id="digestionRateInput" type="number" min="0" max="5" step="0.25" value="1" inputmode="decimal" aria-label="Digestion points per ten seconds">
+        <button id="changeDigestionRateButton" type="button">Change rate</button>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="gameOverPanel" aria-live="assertive">
+      <h2 id="gameOverTitle">GAME OVER</h2>
+      <p id="gameOverEnding"></p>
+      <p id="joinerGameOverMessage" class="hidden">You, the real goddess, casually permavored another little food thing to briefly sate your hedonistic whims.</p>
+      <p class="muted">This preything has been added to The Digested list.</p>
+    </section>
+
+    <section class="panel" id="extraTributeSection">
+      <h2>Extra tribute</h2>
+      <p>Pay tribute to either beg for your life, or show gratitude for the privilege of serving as Fhyra's preything.</p>
+      <button id="extraTributeStartButton" type="button">Roll extra tribute</button>
+      <p id="extraTributeHint" class="muted hidden">The amount will roll for a moment before the payment links appear.</p>
+      <p id="extraTributeJoinerLabel" class="muted hidden">Waiting for extra tribute...</p>
+      <div id="extraTributeDraw" class="hidden">
+        <div id="extraTributeHeading">Your extra tribute</div>
+        <div id="extraTributeAmount">$25.00</div>
+        <div id="extraTributeStatus" aria-live="polite">Rolling for an amount…</div>
+        <div id="extraTributePaymentButtons">
+          <a id="extraPaypalLink" href="https://paypal.me/fhyrapaypal" target="_blank" rel="noopener"><button class="pay-btn" type="button">Pay with PayPal</button></a>
+          <a href="https://throne.com/fhyrajackal" target="_blank" rel="noopener"><button class="throne-btn" type="button">Pay with Throne</button></a>
+        </div>
+        <button id="confirmExtraTributeButton" class="gold hidden" type="button">Confirm tribute received</button>
+        <p id="extraTributeNote" class="muted">The joiner should confirm only after the displayed amount has been received.</p>
+      </div>
+    </section>
+
+    <section id="chatBox" class="panel chat">
+      <h2>Private chat</h2>
+      <div id="messages" aria-live="polite"></div>
+      <div id="chatRow"><input id="chatInput" type="text" maxlength="1000" placeholder="Type a message..." autocomplete="off" aria-label="Chat message"><button id="sendBtn" type="button">Send</button></div>
+      <p class="muted">Messages display the sender's username. Chat becomes read-only after the session ends.</p>
+    </section>
+
+    <section class="panel hidden" id="endSection">
+      <h2 id="endHeading">Session ended</h2>
+      <p id="endMessage" class="muted">Fhyra has ended the trial.</p>
+      <p class="muted">The joiner can reset the room for both participants or return to the main menu after the reset.</p>
+    </section>
+  </section>
+</div>
+
+<script>
+"use strict";
+
+// ======== NEW FIREBASE PROJECT: paste that project's web config here ========
+const firebaseConfig = {
+  apiKey: "AIzaSyA29PUA771Gbb4YQduRuEOHO632p-aTRMo",
+  authDomain: "fhyra-vore.firebaseapp.com",
+  databaseURL: "https://fhyra-vore-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "fhyra-vore",
+  storageBucket: "fhyra-vore.firebasestorage.app",
+  messagingSenderId: "489461423606",
+  appId: "1:489461423606:web:d8fe485e6221ed65cb7bd7"
+};
+
+// ======== EMAILJS: create a new service + template and paste the values ========
+const EMAILJS_PUBLIC_KEY = "6yUaltYoDr-gtit33";
+const EMAILJS_SERVICE_ID = "service_zt6jpcr";
+const EMAILJS_TEMPLATE_ID = "template_v435qwi";
+const GODDESS_EMAIL_ADDRESS = "hanychlaura@gmail.com";
+const JOIN_BASE_URL = window.location.origin + window.location.pathname;
+
+const ROOM_CODE_PATTERN = /^[a-f0-9]{32}$/i;
+const ACTIVE_SESSION_KEY = "fhyraPreything.activeSession.v1";
+const EXTRA_TRIBUTE_SPIN_MS = 2400;
+const MAX_STAT = 100;
+const ROUTES = {
+  oral: { name: "Oral Vore", chambers: ["Maw", "Stomach"], endings: "You're nothing but an unrecognizable remnant, lost to the Goddess's depths." },
+  anal: { name: "Anal Vore", chambers: ["Intestines", "Stomach"], endings: "You're nothing but a forgotten mound of divine dust and bone." },
+  cock: { name: "Cock Vore", chambers: ["Down the urethra", "Ballsack"], endings: "You're nothing but a spent spark, swallowed by primordial heat." },
+  unbirth: { name: "Unbirth", chambers: ["Nethers", "Womb"], endings: "You're nothing but a fading trace in the primordial cradle." }
+};
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+let serverTimeOffset = 0;
+let currentRoomCode = null;
+let isInitiator = false;
+let initiatorName = "";
+let myName = "";
+let roomRef = null;
+let gameStateRef = null;
+let messagesRef = null;
+let messagesQuery = null;
+let resetRef = null;
+let joinerPresenceRef = null;
+let extraTributeRef = null;
+let gameState = null;
+let extraTributeState = null;
+let joinerHasJoined = false;
+let tickInterval = null;
+let tickBusy = false;
+let extraTributeTimer = null;
+let activeExtraTributeId = null;
+let resettingLocally = false;
+let digestedUsersCache = {};
+let currentListenersAttached = false;
+
+const authReady = auth.signInAnonymously().then(() => {
+  db.ref(".info/serverTimeOffset").on("value", snapshot => { serverTimeOffset = Number(snapshot.val()) || 0; });
+  listenForDigestedUsers();
+}).catch(error => {
+  console.error("Anonymous Firebase sign-in failed:", error);
+  setStatus("Firebase sign-in failed. Enable Anonymous sign-in in Firebase Authentication and check your web config.");
+  throw error;
+});
+
+function getServerNow() { return Date.now() + serverTimeOffset; }
+function setStatus(message) { document.getElementById("status").textContent = message || ""; }
+function normalizeUsername(value) { return String(value || "").replace(/[\u0000-\u001F\u007F]/g, "").trim().replace(/\s+/g, " ").slice(0, 40); }
+function usernameKey(value) {
+  const normalized = normalizeUsername(value).toLowerCase();
+  if (!normalized) return "";
+  return Array.from(new TextEncoder().encode(normalized), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+function generateToken() {
+  if (!window.crypto || !crypto.getRandomValues) throw new Error("Secure random generation requires HTTPS in a modern browser.");
+  const bytes = new Uint8Array(16); crypto.getRandomValues(bytes);
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+}
+async function hashToken(token) {
+  if (!crypto.subtle) throw new Error("Secure invitation links require HTTPS.");
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(token)));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+function getCurrentStateRef() { return gameStateRef; }
+function newGameState(name) {
+  const now = getServerNow();
+  return {
+    schema: 1, status: "waiting", victimUsername: name,
+    routeId: null, chamberIndex: -1,
+    hp: 100, stamina: 100, digestion: 0,
+    digestionRatePer10s: 1, lastTickAt: now,
+    protectionType: null, protectionUntil: 0, cooldownUntil: 0,
+    lastActionMessage: "", createdAt: now, updatedAt: now,
+    gameOverCause: "", gameOverText: "", gameOverAt: 0
+  };
+}
+function rollD20() { return 1 + Math.floor(Math.random() * 20); }
+
+function advanceState(currentValue, now) {
+  if (!currentValue || typeof currentValue !== "object") return currentValue;
+  const state = { ...currentValue };
+  if (state.status !== "active" || !state.routeId || !ROUTES[state.routeId]) return state;
+  const lastTickAt = Number(state.lastTickAt) || now;
+  const elapsedMs = Math.max(0, now - lastTickAt);
+  if (elapsedMs <= 0) return state;
+
+  const stageTwo = Number(state.chamberIndex) >= 1;
+  const hpRatePerSecond = stageTwo ? 0.10 : 0.03;
+  const staminaRatePerSecond = stageTwo ? 0.40 : 0.15;
+  const protectionUntil = Number(state.protectionUntil) || 0;
+  const protectedMs = state.protectionType && protectionUntil > lastTickAt
+    ? Math.max(0, Math.min(elapsedMs, protectionUntil - lastTickAt)) : 0;
+  const hpElapsedMs = state.protectionType === "health" ? elapsedMs - protectedMs : elapsedMs;
+  const staminaElapsedMs = state.protectionType === "stamina" ? elapsedMs - protectedMs : elapsedMs;
+
+  state.hp = Math.max(0, Number(state.hp) - (hpElapsedMs / 1000) * hpRatePerSecond);
+  state.stamina = Math.max(0, Number(state.stamina) - (staminaElapsedMs / 1000) * staminaRatePerSecond);
+  if (stageTwo) {
+    state.digestion = Math.min(100, Number(state.digestion) + (elapsedMs / 10000) * Math.max(0, Number(state.digestionRatePer10s) || 0));
+  }
+  state.lastTickAt = now;
+  state.updatedAt = now;
+
+  if (state.hp <= 0 || state.digestion >= 100) {
+    state.status = "gameover";
+    state.gameOverCause = state.hp <= 0 ? "health" : "digestion";
+    state.gameOverText = ROUTES[state.routeId].endings;
+    state.gameOverAt = now;
+    state.hp = Math.max(0, state.hp);
+    state.digestion = Math.min(100, state.digestion);
+  }
+  return state;
+}
+
+function startTickLoop() {
+  if (!gameState || gameState.status !== "active" || !gameState.routeId) { stopTickLoop(); return; }
+  if (tickInterval) return;
+  tickInterval = setInterval(tickGame, 1000);
+  tickGame();
+}
+function stopTickLoop() { if (tickInterval) clearInterval(tickInterval); tickInterval = null; }
+async function tickGame() {
+  if (tickBusy || !gameStateRef || !gameState || gameState.status !== "active") return;
+  tickBusy = true;
+  const ref = gameStateRef;
+  const now = getServerNow();
+  try {
+    const result = await ref.transaction(current => {
+      if (!current || current.status !== "active") return;
+      if (now - (Number(current.lastTickAt) || now) < 250) return;
+      return advanceState(current, now);
+    }, undefined, false);
+    if (result.committed && result.snapshot.val()) {
+      const fresh = result.snapshot.val();
+      if (fresh.status === "gameover") await recordDigestedUsername(fresh);
+    }
+  } catch (error) {
+    console.error("Game tick failed:", error);
+    setStatus("Game state could not update. Check your connection and database rules.");
+  } finally { tickBusy = false; }
+}
+
+function listenForDigestedUsers() {
+  db.ref("digestedUsers").on("value", snapshot => {
+    digestedUsersCache = snapshot.val() && typeof snapshot.val() === "object" ? snapshot.val() : {};
+    renderDigestedList();
+  }, error => {
+    console.error("Could not load The Digested list:", error);
+    setStatus("Could not load The Digested list. Check database read permissions.");
+  });
+}
+function renderDigestedList() {
+  const list = document.getElementById("digestedList");
+  list.replaceChildren();
+  const entries = Object.values(digestedUsersCache || {}).filter(item => item && item.username)
+    .sort((a,b) => Number(b.digestedAt || 0) - Number(a.digestedAt || 0));
+  document.getElementById("digestedEmpty").classList.toggle("hidden", entries.length > 0);
+  for (const entry of entries) {
+    const li = document.createElement("li");
+    li.textContent = entry.username;
+    li.title = entry.cause === "digestion" ? "Reached 100% digestion" : "Health reached zero";
+    list.appendChild(li);
+  }
+}
+async function isUsernameDigested(name) {
+  const key = usernameKey(name);
+  if (!key) return false;
+  if (digestedUsersCache && digestedUsersCache[key]) return true;
+  const snapshot = await db.ref("digestedUsers/" + key).once("value");
+  return snapshot.exists();
+}
+async function recordDigestedUsername(state) {
+  if (!state || !state.victimUsername) return;
+  const username = normalizeUsername(state.victimUsername);
+  const key = usernameKey(username);
+  if (!username || !key) return;
+  const ref = db.ref("digestedUsers/" + key);
+  try {
+    const existing = await ref.once("value");
+    if (existing.exists()) return;
+    await ref.set({
+      username, digestedAt: Number(state.gameOverAt) || getServerNow(),
+      cause: state.gameOverCause || "unknown", routeId: state.routeId || "unknown",
+      ending: state.gameOverText || ""
+    });
+  } catch (error) {
+    // If another participant recorded it first, the create-only rule may reject this write.
+    try { if ((await ref.once("value")).exists()) return; } catch (_) {}
+    console.error("Could not permanently record digested username:", error);
+    setStatus("GAME OVER occurred, but The Digested could not be saved. Check its Firebase rules.");
+  }
+}
+
+function renderGame() {
+  const hasRoom = !!currentRoomCode;
+  document.getElementById("mainMenu").classList.toggle("hidden", hasRoom);
+  document.getElementById("gameArea").classList.toggle("hidden", !hasRoom);
+  if (!hasRoom) return;
+
+  document.getElementById("roleLabel").textContent = isInitiator ? "Role: tiny preything" : "Role: Fhyra — the Goddess";
+  document.getElementById("usernameLabel").textContent = isInitiator ? `Preything: ${initiatorName}` : `Current preything: ${normalizeUsername(gameState && gameState.victimUsername) || initiatorName || "Unknown"}`;
+  const state = gameState || newGameState(initiatorName || "Preything");
+  const hp = clamp(Number(state.hp) || 0, 0, 100);
+  const stamina = clamp(Number(state.stamina) || 0, 0, 100);
+  const digestion = clamp(Number(state.digestion) || 0, 0, 100);
+  document.getElementById("hpValue").textContent = Math.ceil(hp) + "/100";
+  document.getElementById("staminaValue").textContent = Math.ceil(stamina) + "/100";
+  document.getElementById("digestionValue").textContent = digestion.toFixed(1) + "%";
+  document.getElementById("hpBar").style.width = hp + "%";
+  document.getElementById("staminaBar").style.width = stamina + "%";
+  document.getElementById("digestionBar").style.width = digestion + "%";
+  const rateInput = document.getElementById("digestionRateInput");
+  if (document.activeElement !== rateInput) rateInput.value = String(Number(state.digestionRatePer10s ?? 1));
+
+  const route = ROUTES[state.routeId];
+  const waiting = state.status === "waiting" || !state.routeId;
+  const active = state.status === "active" && !!route;
+  const gameover = state.status === "gameover";
+  const ended = state.status === "ended";
+  const hasFinished = gameover || ended;
+
+  document.getElementById("routePanel").classList.toggle("hidden", !(waiting && !isInitiator));
+  document.getElementById("chamberPanel").classList.toggle("hidden", !active);
+  document.getElementById("initiatorActions").classList.toggle("hidden", !(active && isInitiator));
+  document.getElementById("joinerControls").classList.toggle("hidden", !(active && !isInitiator));
+  document.getElementById("gameOverPanel").style.display = gameover ? "block" : "none";
+  document.getElementById("endSection").classList.toggle("hidden", !ended);
+  document.getElementById("extraTributeSection").style.display = hasRoom ? "block" : "none";
+  document.getElementById("chatBox").style.display = hasRoom ? "block" : "none";
+  document.getElementById("chatInput").disabled = hasFinished;
+  document.getElementById("sendBtn").disabled = hasFinished;
+  document.getElementById("nextChamberControl").classList.toggle("hidden", !(active && !isInitiator && Number(state.chamberIndex) === 0));
+
+  const endContainer = document.getElementById("endButtonContainer");
+  endContainer.replaceChildren();
+  if (!isInitiator) {
+    if (active || waiting) {
+      const end = makeButton("End session", "danger", endSession);
+      endContainer.appendChild(end);
+    }
+    const reset = makeButton("Reset session for both", "secondary", resetSessionForBoth);
+    reset.title = "Returns both participants to the main menu";
+    endContainer.appendChild(reset);
+  }
+
+  if (waiting) {
+    document.getElementById("sceneHeading").textContent = "Between the Goddess's fingers";
+    document.getElementById("sceneText").textContent = isInitiator
+      ? "A tiny preything rests between Fhyra's fingers. The world is enormous from here; wait for the Goddess to choose a route."
+      : `You hold ${normalizeUsername(state.victimUsername) || "your tiny preything"} delicately between two fingers. Choose a route to begin the trial.`;
+    document.getElementById("chamberTitle").textContent = "Choose the first chamber";
+  } else if (active && route) {
+    const chamberName = route.chambers[Math.min(1, Math.max(0, Number(state.chamberIndex)))];
+    document.getElementById("sceneHeading").textContent = `${route.name}: ${chamberName}`;
+    document.getElementById("sceneText").textContent = Number(state.chamberIndex) === 0
+      ? `The first chamber slowly sips away health and stamina. Fhyra alone decides when to advance to ${route.chambers[1]}.`
+      : `Inside ${chamberName}, health and stamina drain faster. Digestion now rises by ${Number(state.digestionRatePer10s ?? 1)} point(s) every 10 seconds while the trial continues.`;
+    document.getElementById("chamberTitle").textContent = `${route.name} — Chamber ${Number(state.chamberIndex) + 1}: ${chamberName}`;
+    document.getElementById("chamberDescription").textContent = Number(state.chamberIndex) === 0
+      ? "Chamber I: health drains 1.8 points per minute and stamina drains 9 points per minute. No digestion progress occurs here."
+      : `Chamber II: health drains 6 points per minute and stamina drains 24 points per minute. Digestion rises at the rate chosen by Fhyra.`;
+  } else if (gameover) {
+    document.getElementById("sceneHeading").textContent = "GAME OVER";
+    document.getElementById("sceneText").textContent = state.gameOverCause === "digestion"
+      ? "The digestion meter has reached 100%. The trial is over."
+      : "Health has reached zero. The trial is over.";
+    document.getElementById("gameOverEnding").textContent = state.gameOverText || (route ? route.endings : "The trial has ended.");
+    document.getElementById("joinerGameOverMessage").classList.toggle("hidden", isInitiator);
+    document.getElementById("endHeading").textContent = "GAME OVER";
+    document.getElementById("endMessage").textContent = "The username has been added to The Digested.";
+  } else if (ended) {
+    document.getElementById("sceneHeading").textContent = "Session ended";
+    document.getElementById("sceneText").textContent = "Fhyra ended the trial before a game-over condition was reached.";
+    document.getElementById("endHeading").textContent = "Session ended";
+    document.getElementById("endMessage").textContent = "This trial ended without adding the preything to The Digested.";
+  }
+
+  const now = getServerNow();
+  const waitingForAbility = now < (Number(state.cooldownUntil) || 0) || now < (Number(state.protectionUntil) || 0);
+  document.getElementById("struggleButton").disabled = !active || !isInitiator || waitingForAbility;
+  document.getElementById("worshipButton").disabled = !active || !isInitiator || waitingForAbility;
+  if (active && isInitiator) {
+    const leftCooldown = Math.max(0, Math.ceil(((Number(state.cooldownUntil) || 0) - now) / 1000));
+    const leftEffect = Math.max(0, Math.ceil(((Number(state.protectionUntil) || 0) - now) / 1000));
+    document.getElementById("actionFeedback").textContent = leftEffect > 0
+      ? `${state.protectionType === "health" ? "Health" : "Stamina"} protected for ${leftEffect}s. ${leftCooldown > 0 ? `Next action in ${leftCooldown}s.` : ""} ${state.lastActionMessage || ""}`
+      : `${leftCooldown > 0 ? `Next action in ${leftCooldown}s. ` : ""}${state.lastActionMessage || ""}`;
+  }
+  document.getElementById("restoreHealthButton").disabled = !active || isInitiator || hp >= 100;
+  document.getElementById("restoreStaminaButton").disabled = !active || isInitiator || stamina >= 100;
+  document.getElementById("changeDigestionRateButton").disabled = !active || isInitiator;
+  document.getElementById("nextChamberButton").disabled = !active || isInitiator || Number(state.chamberIndex) !== 0;
+
+  if (active && state.lastActionMessage && state.updatedAt) {
+    // Show the latest shared action in a separate small status line for both players.
+    const actionLine = document.getElementById("actionFeedback");
+    if (!isInitiator) actionLine.textContent = state.lastActionMessage;
+  }
+  if (active) startTickLoop(); else stopTickLoop();
+  renderExtraTributePanel();
+}
+function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+function makeButton(text, className, handler) {
+  const button = document.createElement("button");
+  button.type = "button"; button.textContent = text;
+  if (className) button.className = className;
+  button.addEventListener("click", handler);
+  return button;
+}
+
+async function selectRoute(routeId) {
+  if (isInitiator || !gameStateRef || !ROUTES[routeId]) return;
+  const now = getServerNow();
+  try {
+    const result = await gameStateRef.transaction(current => {
+      if (!current || current.status !== "waiting" || current.routeId) return;
+      return { ...current, status: "active", routeId, chamberIndex: 0, lastTickAt: now, updatedAt: now, lastActionMessage: `Fhyra chose ${ROUTES[routeId].name}.` };
+    });
+    if (result.committed && messagesRef) await addSystemMessage(`Fhyra chose the ${ROUTES[routeId].name} route.`);
+    else setStatus("A route has already been chosen, or the session is no longer waiting.");
+  } catch (error) { console.error(error); setStatus("Could not choose a route. Check Firebase permissions."); }
+}
+
+async function advanceChamber() {
+  if (isInitiator || !gameStateRef) return;
+  const now = getServerNow();
+  try {
+    const result = await gameStateRef.transaction(current => {
+      if (!current || current.status !== "active" || current.chamberIndex !== 0 || !current.routeId) return;
+      const advanced = advanceState(current, now);
+      if (advanced.status !== "active") return advanced;
+      return { ...advanced, chamberIndex: 1, lastTickAt: now, updatedAt: now, lastActionMessage: `Fhyra advanced the trial to ${ROUTES[current.routeId].chambers[1]}.` };
+    });
+    if (result.committed && result.snapshot.val() && result.snapshot.val().chamberIndex === 1) await addSystemMessage("Fhyra advanced to the second chamber. Digestion has begun.");
+  } catch (error) { console.error(error); setStatus("Could not advance chambers. Check your connection."); }
+}
+
+async function useAbility(type) {
+  if (!isInitiator || !gameStateRef || !["struggle", "worship"].includes(type)) return;
+  const now = getServerNow();
+  const staminaCost = type === "struggle" ? rollD20() : 0;
+  const seconds = type === "struggle" ? rollD20() + rollD20() : rollD20();
+  try {
+    const result = await gameStateRef.transaction(current => {
+      if (!current || current.status !== "active" || !current.routeId) return;
+      const advanced = advanceState(current, now);
+      if (advanced.status !== "active") return advanced;
+      if (now < (Number(advanced.cooldownUntil) || 0) || now < (Number(advanced.protectionUntil) || 0)) return;
+      if (type === "struggle") {
+        advanced.stamina = Math.max(0, Number(advanced.stamina) - staminaCost);
+        advanced.protectionType = "health";
+        advanced.lastActionMessage = `Struggle roll: ${staminaCost} stamina spent; health protected for ${seconds}s.`;
+      } else {
+        advanced.protectionType = "stamina";
+        advanced.lastActionMessage = `Worship roll: stamina loss prevented for ${seconds}s.`;
+      }
+      advanced.protectionUntil = now + seconds * 1000;
+      advanced.cooldownUntil = now + 30000;
+      advanced.lastTickAt = now;
+      advanced.updatedAt = now;
+      return advanced;
+    });
+    if (!result.committed) setStatus("Your action is cooling down. Struggle and worship cannot overlap.");
+    else if (result.snapshot.val() && result.snapshot.val().lastActionMessage) await addSystemMessage(result.snapshot.val().lastActionMessage);
+  } catch (error) { console.error(error); setStatus("Could not use that action. Check your connection."); }
+}
+
+async function restoreStat(stat) {
+  if (isInitiator || !gameStateRef || !["hp", "stamina"].includes(stat)) return;
+  const now = getServerNow();
+  try {
+    const result = await gameStateRef.transaction(current => {
+      if (!current || current.status !== "active") return;
+      const next = advanceState(current, now);
+      if (next.status !== "active") return next;
+      next[stat] = Math.min(MAX_STAT, Number(next[stat]) + 20);
+      next.updatedAt = now;
+      next.lastTickAt = now;
+      next.lastActionMessage = `Fhyra restored 20 ${stat === "hp" ? "health" : "stamina"}.`;
+      return next;
+    });
+    if (result.committed && result.snapshot.val()) await addSystemMessage(result.snapshot.val().lastActionMessage);
+  } catch (error) { console.error(error); setStatus("Could not restore the stat. Check your connection."); }
+}
+
+async function changeDigestionRate() {
+  if (isInitiator || !gameStateRef) return;
+  const input = document.getElementById("digestionRateInput");
+  const rate = Number(input.value);
+  if (!Number.isFinite(rate) || rate < 0 || rate > 5 || Math.abs(rate * 4 - Math.round(rate * 4)) > 0.00001) {
+    setStatus("Enter a rate from 0 to 5 in steps of 0.25."); input.focus(); return;
+  }
+  const now = getServerNow();
+  try {
+    const result = await gameStateRef.transaction(current => {
+      if (!current || current.status !== "active") return;
+      const next = advanceState(current, now);
+      if (next.status !== "active") return next;
+      next.digestionRatePer10s = rate;
+      next.lastTickAt = now;
+      next.updatedAt = now;
+      next.lastActionMessage = `Fhyra changed digestion to ${rate} point(s) per 10 seconds.`;
+      return next;
+    });
+    if (result.committed && result.snapshot.val()) await addSystemMessage(result.snapshot.val().lastActionMessage);
+    else setStatus("The digestion rate could not be changed because the session is no longer active.");
+  } catch (error) { console.error(error); setStatus("Could not change digestion rate. Check Firebase permissions."); }
+}
+
+async function endSession() {
+  if (isInitiator || !gameStateRef || !currentRoomCode) return;
+  const now = getServerNow();
+  try {
+    const result = await gameStateRef.transaction(current => {
+      if (!current || !["waiting", "active"].includes(current.status)) return;
+      const next = current.status === "active" ? advanceState(current, now) : { ...current };
+      if (next.status === "gameover") return next;
+      next.status = "ended"; next.updatedAt = now; next.endedAt = now; next.lastTickAt = now;
+      return next;
+    });
+    const savedState = result.snapshot && result.snapshot.val();
+    if (savedState && savedState.status === "gameover") {
+      await recordDigestedUsername(savedState);
+      setStatus("The game-over scene has already triggered.");
+      return;
+    }
+    if (result.committed) { stopTickLoop(); await addSystemMessage("Fhyra ended the trial."); }
+  } catch (error) { console.error(error); setStatus("Could not end the session. Check your connection."); }
+}
+
+async function resetSessionForBoth() {
+  if (isInitiator || !roomRef || resettingLocally) return;
+  if (!confirm("Reset this room for both participants and return to the main menu?")) return;
+  resettingLocally = true;
+  try {
+    const result = await resetRef.transaction(current => Number(current) > 0 ? undefined : getServerNow());
+    if (!result.committed && !(Number(result.snapshot.val()) > 0)) throw new Error("Reset was not saved.");
+    returnToMainMenu();
+  } catch (error) { console.error(error); setStatus("Could not reset the room. Check Firebase permissions."); }
+  finally { resettingLocally = false; }
+}
+
+function addMessage(text, sender) {
+  const container = document.getElementById("messages");
+  const div = document.createElement("div");
+  div.className = "chat-message" + (sender === myName ? " self" : "") + (sender === "System" ? " system" : "");
+  const title = document.createElement("strong"); title.textContent = `${sender}: `;
+  const content = document.createElement("span"); content.textContent = String(text);
+  div.append(title, content); container.appendChild(div);
+  while (container.children.length > 150) container.firstElementChild.remove();
+  container.scrollTop = container.scrollHeight;
+}
+async function addSystemMessage(text) {
+  if (!messagesRef) return;
+  try { await messagesRef.push({ text: String(text), sender: "System", timestamp: getServerNow() }); }
+  catch (error) { console.warn("Could not post system chat message:", error); }
+}
+async function sendMessage() {
+  if (!messagesRef || !currentRoomCode || !gameState || ["ended", "gameover"].includes(gameState.status)) return;
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
+  if (!text) return;
+  input.disabled = true;
+  try { await messagesRef.push({ text, sender: myName, timestamp: getServerNow() }); input.value = ""; }
+  catch (error) { console.error(error); setStatus("Message could not be sent. Check your connection."); }
+  finally { input.disabled = !!(gameState && ["ended", "gameover"].includes(gameState.status)); }
+}
+
+function renderExtraTributePanel() {
+  const section = document.getElementById("extraTributeSection");
+  if (!currentRoomCode || !extraTributeRef) { section.style.display = "none"; return; }
+  section.style.display = "block";
+  const start = document.getElementById("extraTributeStartButton");
+  const hint = document.getElementById("extraTributeHint");
+  const waiting = document.getElementById("extraTributeJoinerLabel");
+  const draw = document.getElementById("extraTributeDraw");
+  start.classList.toggle("hidden", !isInitiator || !!(extraTributeState && extraTributeState.status === "pending"));
+  start.disabled = isInitiator && !joinerHasJoined;
+  hint.classList.toggle("hidden", !isInitiator || !joinerHasJoined);
+  waiting.classList.toggle("hidden", isInitiator || !!(extraTributeState && extraTributeState.status === "pending"));
+  if (!extraTributeState || extraTributeState.status === "confirmed" || extraTributeState.status !== "pending") {
+    draw.classList.add("hidden"); clearExtraTributeTimer(); return;
+  }
+  draw.classList.remove("hidden");
+  if (getServerNow() < Number(extraTributeState.createdAt) + EXTRA_TRIBUTE_SPIN_MS) startExtraTributeSpin(extraTributeState);
+  else finishExtraTributeSpin(extraTributeState);
+}
+function randomExtraTributeAmount() { return 25 + Math.floor(Math.random() * 46) * 5; }
+function clearExtraTributeTimer() { if (extraTributeTimer) clearTimeout(extraTributeTimer); extraTributeTimer = null; }
+function startExtraTributeSpin(state) {
+  if (activeExtraTributeId === state.id && extraTributeTimer) return;
+  clearExtraTributeTimer(); activeExtraTributeId = state.id;
+  const finishAt = Number(state.createdAt) + EXTRA_TRIBUTE_SPIN_MS;
+  document.getElementById("extraTributePaymentButtons").style.display = "none";
+  document.getElementById("confirmExtraTributeButton").classList.add("hidden");
+  document.getElementById("extraTributeHeading").textContent = isInitiator ? "Your extra tribute amount" : "Extra tribute amount";
+  if (!isInitiator) {
+    document.getElementById("extraTributeAmount").textContent = `$${Number(state.amount).toFixed(2)}`;
+    document.getElementById("extraTributeStatus").textContent = "The preything is preparing the extra tribute…";
+    extraTributeTimer = setTimeout(() => finishExtraTributeSpin(state), Math.max(0, finishAt - getServerNow()));
+    return;
+  }
+  document.getElementById("extraTributeStatus").textContent = "Rolling for an amount…";
+  const tick = () => {
+    if (!extraTributeState || extraTributeState.id !== state.id || extraTributeState.status !== "pending") return;
+    const remaining = finishAt - getServerNow();
+    if (remaining <= 0) { finishExtraTributeSpin(state); return; }
+    document.getElementById("extraTributeAmount").textContent = `$${randomExtraTributeAmount().toFixed(2)}`;
+    extraTributeTimer = setTimeout(tick, Math.min(remaining, 55 + Math.floor((1 - remaining / EXTRA_TRIBUTE_SPIN_MS) ** 2 * 180)));
+  };
+  tick();
+}
+function finishExtraTributeSpin(state) {
+  clearExtraTributeTimer(); activeExtraTributeId = state.id;
+  document.getElementById("extraTributeAmount").textContent = `$${Number(state.amount).toFixed(2)}`;
+  document.getElementById("extraTributeHeading").textContent = isInitiator ? "Your extra tribute amount" : "Extra tribute amount";
+  document.getElementById("extraTributeStatus").textContent = isInitiator ? "The amount is ready. Use a payment link, then wait for Fhyra to confirm." : "After receiving the displayed amount, confirm the tribute below.";
+  document.getElementById("extraTributePaymentButtons").style.display = isInitiator ? "block" : "none";
+  document.getElementById("confirmExtraTributeButton").classList.toggle("hidden", isInitiator);
+  document.getElementById("confirmExtraTributeButton").disabled = false;
+  document.getElementById("extraPaypalLink").href = `https://paypal.me/fhyrapaypal/${Number(state.amount).toFixed(2)}`;
+}
+async function startExtraTributeDraw() {
+  if (!isInitiator || !extraTributeRef || !currentRoomCode || !joinerHasJoined) { setStatus("Wait until Fhyra has joined the session."); return; }
+  if (extraTributeState && extraTributeState.status === "pending") { setStatus("An extra tribute is already waiting for confirmation."); return; }
+  const id = extraTributeRef.push().key;
+  const newDraw = { id, amount: randomExtraTributeAmount(), status: "pending", createdAt: getServerNow(), createdBy: myName };
+  try {
+    const result = await extraTributeRef.transaction(current => current && current.status === "pending" ? undefined : newDraw);
+    if (!result.committed) setStatus("An extra tribute is already pending.");
+  } catch (error) { console.error(error); setStatus("Could not start extra tribute. Check Firebase permissions."); }
+}
+async function confirmExtraTribute() {
+  if (isInitiator || !extraTributeRef || !extraTributeState || extraTributeState.status !== "pending") return;
+  const previousId = extraTributeState.id;
+  const amount = Number(extraTributeState.amount);
+  if (getServerNow() < Number(extraTributeState.createdAt) + EXTRA_TRIBUTE_SPIN_MS) return;
+  const button = document.getElementById("confirmExtraTributeButton"); button.disabled = true;
+  try {
+    const result = await extraTributeRef.transaction(current => {
+      if (!current || current.id !== previousId || current.status !== "pending") return;
+      const currentAmount = Number(current.amount);
+      if (!Number.isFinite(currentAmount) || currentAmount < 25 || currentAmount > 250 || currentAmount % 5 !== 0) return;
+      return { ...current, status: "confirmed", confirmedAt: getServerNow(), confirmedBy: "Fhyra" };
+    });
+    if (result.committed) setStatus(`Extra tribute of $${amount.toFixed(2)} confirmed. Thank you, Fhyra!`);
+    else { button.disabled = false; setStatus("This extra tribute has already been confirmed or replaced."); }
+  } catch (error) { console.error(error); button.disabled = false; setStatus("Could not confirm the extra tribute. Check your connection."); }
+}
+
+function attachRoom(code, role, name) {
+  detachRoomListeners();
+  currentRoomCode = code;
+  isInitiator = role === "initiator";
+  initiatorName = normalizeUsername(name);
+  myName = isInitiator ? initiatorName : "Fhyra";
+  roomRef = db.ref("rooms/" + currentRoomCode);
+  gameStateRef = roomRef.child("gameState");
+  messagesRef = roomRef.child("messages");
+  messagesQuery = messagesRef.orderByChild("timestamp").limitToLast(150);
+  resetRef = roomRef.child("resetAt");
+  joinerPresenceRef = roomRef.child("joinerPresent");
+  extraTributeRef = roomRef.child("extraTributeState");
+  gameState = null; extraTributeState = null; joinerHasJoined = false;
+  document.getElementById("roomCode").textContent = currentRoomCode;
+  document.getElementById("messages").replaceChildren();
+  document.getElementById("mainMenu").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  try { localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ code: currentRoomCode, role, username: initiatorName })); } catch (_) {}
+
+  if (isInitiator) {
+    joinerPresenceRef.on("value", snapshot => { joinerHasJoined = snapshot.val() === true; renderExtraTributePanel(); });
+  } else {
+    joinerPresenceRef.onDisconnect().remove().then(() => joinerPresenceRef.set(true)).catch(error => console.warn("Presence update failed", error));
+  }
+  gameStateRef.on("value", snapshot => {
+    gameState = snapshot.val() && typeof snapshot.val() === "object" ? snapshot.val() : null;
+    renderGame();
+    if (gameState && gameState.status === "gameover") recordDigestedUsername(gameState);
+  }, error => { console.error(error); setStatus("Could not load game state. Check Firebase database permissions."); });
+  messagesQuery.on("child_added", snapshot => {
+    const message = snapshot.val();
+    if (message && typeof message.text === "string") addMessage(message.text, String(message.sender || "Unknown"));
+  });
+  resetRef.on("value", snapshot => {
+    if (Number(snapshot.val()) > 0 && !resettingLocally) returnToMainMenu();
+  });
+  extraTributeRef.on("value", snapshot => {
+    const previous = extraTributeState;
+    const value = snapshot.val();
+    extraTributeState = value && typeof value === "object" ? value : null;
+    if (isInitiator && previous && previous.status === "pending" && extraTributeState && extraTributeState.status === "confirmed") {
+      setStatus(`Extra tribute of $${Number(extraTributeState.amount).toFixed(2)} confirmed by Fhyra!`);
+    }
+    renderExtraTributePanel();
+  });
+  currentListenersAttached = true;
+  document.getElementById("chatBox").style.display = "block";
+  document.getElementById("roomDisplay").style.display = "block";
+  renderGame();
+}
+
+function detachRoomListeners() {
+  stopTickLoop(); clearExtraTributeTimer();
+  if (messagesQuery) messagesQuery.off();
+  if (gameStateRef) gameStateRef.off();
+  if (resetRef) resetRef.off();
+  if (joinerPresenceRef) joinerPresenceRef.off();
+  if (extraTributeRef) extraTributeRef.off();
+  if (roomRef) roomRef.off();
+  currentListenersAttached = false;
+}
+function returnToMainMenu() {
+  detachRoomListeners();
+  if (joinerPresenceRef && !isInitiator) joinerPresenceRef.onDisconnect().cancel().catch(() => {});
+  try { localStorage.removeItem(ACTIVE_SESSION_KEY); } catch (_) {}
+  if (window.location.search) history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+  currentRoomCode = null; roomRef = null; gameStateRef = null; messagesRef = null; messagesQuery = null; resetRef = null; joinerPresenceRef = null; extraTributeRef = null;
+  gameState = null; extraTributeState = null; isInitiator = false; initiatorName = ""; myName = ""; joinerHasJoined = false;
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("mainMenu").classList.remove("hidden");
+  document.getElementById("status").textContent = "";
+  document.getElementById("extraTributeDraw").classList.add("hidden");
+  document.getElementById("extraTributePaymentButtons").style.display = "none";
+  renderDigestedList();
+}
+
+async function initiateSession() {
+  try { await authReady; } catch (_) { return; }
+  const nameInput = document.getElementById("initiatorNameInput");
+  const name = normalizeUsername(nameInput.value);
+  if (!name) { setStatus("Enter a username first."); nameInput.focus(); return; }
+  try {
+    if (await isUsernameDigested(name)) { setStatus("That username is in The Digested list and cannot be used again."); return; }
+    const code = generateToken();
+    const inviteToken = generateToken();
+    const tokenHash = await hashToken(inviteToken);
+    const state = newGameState(name);
+    setStatus("Creating a new trial…");
+    const updates = {};
+    updates[`rooms/${code}/initiatorName`] = name;
+    updates[`rooms/${code}/inviteTokenHash`] = tokenHash;
+    updates[`rooms/${code}/gameState`] = state;
+    updates[`rooms/_inviteTokenIndex/${tokenHash}`] = code;
+    await db.ref().update(updates);
+    attachRoom(code, "initiator", name);
+    const joinLink = `${JOIN_BASE_URL}?invite=${encodeURIComponent(inviteToken)}`;
+    const emailConfigured = ![EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, GODDESS_EMAIL_ADDRESS].some(v => !v || v.includes("PASTE_") || v.includes("YOUR_EMAIL"));
+    if (!emailConfigured) {
+      setStatus("Trial created. Email is not configured yet; complete the EmailJS setup steps below before inviting Fhyra.");
+      return;
+    }
+    try {
+      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: GODDESS_EMAIL_ADDRESS,
+        join_link: joinLink,
+        room_code: code,
+        initiator_username: name
+      });
+      setStatus("Invitation email sent — waiting for Fhyra to join.");
+    } catch (error) {
+      console.error("Invitation email failed:", error);
+      setStatus("Trial created, but the invitation email failed. Check the EmailJS service, template and allowed domain.");
+    }
+  } catch (error) {
+    console.error("Could not create a trial:", error);
+    setStatus(error && error.message ? error.message : "Could not create trial. Check Firebase setup and permissions.");
+  }
+}
+
+async function joinRoomByInviteToken(token) {
+  await authReady;
+  const cleanToken = String(token || "").trim();
+  if (!cleanToken) { setStatus("This invitation link has no token. Ask for a new invitation."); return; }
+  try {
+    const tokenHash = await hashToken(cleanToken);
+    const codeSnapshot = await db.ref("rooms/_inviteTokenIndex/" + tokenHash).once("value");
+    const code = String(codeSnapshot.val() || "").toLowerCase();
+    if (!ROOM_CODE_PATTERN.test(code)) throw new Error("This invitation link is invalid or expired.");
+    await joinRoomByCode(code, cleanToken);
+  } catch (error) { console.error(error); setStatus(error.message || "Could not verify the invitation link."); }
+}
+async function joinRoomByCode(code, token = "") {
+  await authReady;
+  const cleanCode = String(code || "").trim().toLowerCase();
+  if (!ROOM_CODE_PATTERN.test(cleanCode)) { setStatus("Enter a valid 32-character room code."); return; }
+  try {
+    const ref = db.ref("rooms/" + cleanCode);
+    const [ownerSnap, tokenSnap, resetSnap, stateSnap] = await Promise.all([
+      ref.child("initiatorName").once("value"), ref.child("inviteTokenHash").once("value"),
+      ref.child("resetAt").once("value"), ref.child("gameState").once("value")
+    ]);
+    const owner = normalizeUsername(ownerSnap.val());
+    if (!owner || !stateSnap.exists()) throw new Error("No active trial exists for that room code.");
+    if (Number(resetSnap.val()) > 0) throw new Error("This trial has already been reset. Start a new one.");
+    const savedHash = String(tokenSnap.val() || "");
+    if (savedHash && (!token || await hashToken(token) !== savedHash)) throw new Error("Fhyra must use the private invitation link, not the room code.");
+    attachRoom(cleanCode, "joiner", owner);
+    document.getElementById("roomInput").value = "";
+    setStatus("Fhyra has entered the trial.");
+  } catch (error) { console.error(error); setStatus(error.message || "Could not join the session. Check the invitation and Firebase rules."); }
+}
+async function rejoinAsInitiator() {
+  await authReady;
+  const code = document.getElementById("roomInput").value.trim().toLowerCase();
+  if (!ROOM_CODE_PATTERN.test(code)) { setStatus("Enter the full 32-character room code."); return; }
+  try {
+    const ref = db.ref("rooms/" + code);
+    const [ownerSnap, stateSnap, resetSnap] = await Promise.all([ref.child("initiatorName").once("value"), ref.child("gameState").once("value"), ref.child("resetAt").once("value")]);
+    const owner = normalizeUsername(ownerSnap.val());
+    if (!owner || !stateSnap.exists()) throw new Error("No trial exists for that room code.");
+    if (Number(resetSnap.val()) > 0) throw new Error("That trial has already been reset.");
+    attachRoom(code, "initiator", owner);
+    document.getElementById("roomInput").value = "";
+    setStatus("Rejoined the trial as the preything.");
+  } catch (error) { console.error(error); setStatus(error.message || "Could not rejoin the trial."); }
+}
+
+function copyCode() {
+  const text = document.getElementById("roomCode").textContent;
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(() => setStatus("Room code copied.")).catch(() => prompt("Copy this room code:", text));
+  else prompt("Copy this room code:", text);
+}
+function restoreSavedSession() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY) || "null"); } catch (_) {}
+  if (!saved || !ROOM_CODE_PATTERN.test(String(saved.code || "")) || !["initiator", "joiner"].includes(saved.role)) return false;
+  db.ref("rooms/" + saved.code).child("initiatorName").once("value").then(snapshot => {
+    const name = normalizeUsername(snapshot.val());
+    if (!name) { localStorage.removeItem(ACTIVE_SESSION_KEY); return; }
+    attachRoom(saved.code, saved.role, name);
+    setStatus("Restored your previous trial.");
+  }).catch(error => { console.warn("Could not restore previous room:", error); });
+  return true;
+}
+
+// Button bindings
+ document.getElementById("initiateButton").addEventListener("click", initiateSession);
+ document.getElementById("rejoinButton").addEventListener("click", rejoinAsInitiator);
+ document.getElementById("copyCodeButton").addEventListener("click", copyCode);
+ document.getElementById("nextChamberButton").addEventListener("click", advanceChamber);
+ document.getElementById("struggleButton").addEventListener("click", () => useAbility("struggle"));
+ document.getElementById("worshipButton").addEventListener("click", () => useAbility("worship"));
+ document.getElementById("restoreHealthButton").addEventListener("click", () => restoreStat("hp"));
+ document.getElementById("restoreStaminaButton").addEventListener("click", () => restoreStat("stamina"));
+ document.getElementById("changeDigestionRateButton").addEventListener("click", changeDigestionRate);
+ document.getElementById("sendBtn").addEventListener("click", sendMessage);
+ document.getElementById("chatInput").addEventListener("keydown", event => { if (event.key === "Enter") sendMessage(); });
+ document.getElementById("extraTributeStartButton").addEventListener("click", startExtraTributeDraw);
+ document.getElementById("confirmExtraTributeButton").addEventListener("click", confirmExtraTribute);
+
+window.addEventListener("load", async () => {
+  try {
+    await authReady;
+    const params = new URLSearchParams(window.location.search);
+    const invite = params.get("invite");
+    if (invite) { await joinRoomByInviteToken(invite); return; }
+    restoreSavedSession();
+  } catch (_) {}
+});
+document.addEventListener("visibilitychange", () => { if (!document.hidden) tickGame(); });
+window.addEventListener("pageshow", () => { if (!document.hidden) tickGame(); });
+window.addEventListener("online", () => { if (!document.hidden) tickGame(); });
+</script>
+</body>
+</html>
