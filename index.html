@@ -130,7 +130,7 @@
 
     <section class="panel hidden" id="routePanel">
       <h2>How to devour my prey toy~</h2>
-      <p class="muted">Fhyra will choose your fate. No matter how she decides to use your inferior existence for her hedonistic pleasures, she will first toy with you and then your health and stamina will begin to break down faster, as digestion kicks in..</p>
+      <p class="muted">Fhyra will choose your fate. No matter how she decides to use your inferior existence for her hedonistic pleasures, she will first toy with you and then your health and stamina will begin to break down faster, as digestion kicks in.</p>
       <div class="route-grid">
         <button type="button" onclick="selectRoute('oral')">Oral Vore<small>Maw → Stomach</small></button>
         <button type="button" onclick="selectRoute('anal')">Anal Vore<small>Intestines → Stomach</small></button>
@@ -160,7 +160,7 @@
 
     <section class="panel hidden" id="joinerControls">
       <h2>Fhyra's control</h2>
-      <p class="muted">Offer the preything some reprieve at any time to reward them or extend their suffering, or adjust digestion's pace.</p>
+      <p class="muted">Offer the preything some reprieve at any time to reward them or extend their suffering, or adjust their digestion's pace.</p>
       <div class="split">
         <button id="restoreHealthButton" class="good" type="button">Give +20 health</button>
         <button id="restoreStaminaButton" class="good" type="button">Give +20 stamina</button>
@@ -484,16 +484,16 @@ function renderGame() {
   if (waiting) {
     document.getElementById("sceneHeading").textContent = "Between the Goddess's fingers";
     document.getElementById("sceneText").textContent = isInitiator
-      ? "A tiny preything rests between Fhyra's fingers. The world is enormous from here; wait for the Goddess to choose your fate."
+      ? "A tiny preything anxiously rests between Fhyra's fingers. Her natural warmth washes over you, the superiority of her presence overwhelms your instincts; wait for the Goddess to choose your fate."
       : `You hold ${normalizeUsername(state.victimUsername) || "your tiny preything"} delicately, yet assertively, between two fingers. How shall I amuse myself with this snack~?`;
     document.getElementById("chamberTitle").textContent = "Choose their fate";
   } else if (active && route) {
     const chamberName = route.chambers[Math.min(1, Math.max(0, Number(state.chamberIndex)))];
     document.getElementById("sceneHeading").textContent = `${route.name}: ${chamberName}`;
     document.getElementById("sceneText").textContent = Number(state.chamberIndex) === 0
-      ? `The first of the prey's predicaments slowly sips away health and stamina. Fhyra alone decides when to swallow the prey towards ${route.chambers[1]}.`
-      : `Inside ${chamberName}, health and stamina drain faster. Digestion now rises by ${Number(state.digestionRatePer10s ?? 1)} point(s) every 10s within the depths of the goddess' biology.`;
-    document.getElementById("chamberTitle").textContent = `${route.name} — Chamber ${Number(state.chamberIndex) + 1}: ${chamberName}`;
+      ? `The first of the prey's predicaments slowly sips away health and stamina. Fhyra alone decides when to swallow the prey towards her ${route.chambers[1]}.`
+      : `Inside the ${chamberName}, health and stamina drain faster. Digestion now rises by ${Number(state.digestionRatePer10s ?? 1)} point(s) every 10s within the depths of the goddess' biology.`;
+    document.getElementById("chamberTitle").textContent = `${route.name} — Chamber ${Number(state.chamberIndex) + 1}: The ${chamberName}`;
     document.getElementById("chamberDescription").textContent = Number(state.chamberIndex) === 0
       ? "Chamber I: health drains at 1.8/min and stamina drains at 9/min. The prey's not being digested... yet."
       : `Chamber II: health drains at 6/min and stamina drains 24/min. Digestion rises at whichever rate Fhyra fancies.`;
@@ -567,7 +567,7 @@ async function advanceChamber() {
       if (!current || current.status !== "active" || current.chamberIndex !== 0 || !current.routeId) return;
       const advanced = advanceState(current, now);
       if (advanced.status !== "active") return advanced;
-      return { ...advanced, chamberIndex: 1, lastTickAt: now, updatedAt: now, lastActionMessage: `Fhyra swallows you further towards ${ROUTES[current.routeId].chambers[1]}.` };
+      return { ...advanced, chamberIndex: 1, lastTickAt: now, updatedAt: now, lastActionMessage: `Fhyra swallows you further towards her ${ROUTES[current.routeId].chambers[1]}.` };
     });
     if (result.committed && result.snapshot.val() && result.snapshot.val().chamberIndex === 1) await addSystemMessage("You're fully engulfed within the goddess' endless hunger. Digestion has begun.");
   } catch (error) { console.error(error); setStatus("Could not advance chambers. Check your connection."); }
@@ -936,7 +936,7 @@ async function joinRoomByCode(code, token = "") {
     if (savedHash && (!token || await hashToken(token) !== savedHash)) throw new Error("Fhyra must use the private invitation link, not the room code.");
     attachRoom(cleanCode, "joiner", owner);
     document.getElementById("roomInput").value = "";
-    setStatus("Fhyra has entered the trial.");
+    setStatus("Fhyra has entered the session.");
   } catch (error) { console.error(error); setStatus(error.message || "Could not join the session. Check the invitation and Firebase rules."); }
 }
 async function rejoinAsInitiator() {
