@@ -807,7 +807,15 @@ function attachRoom(code, role, name) {
   try { localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ code: currentRoomCode, role, username: initiatorName })); } catch (_) {}
 
   if (isInitiator) {
-    joinerPresenceRef.on("value", snapshot => { joinerHasJoined = snapshot.val() === true; renderExtraTributePanel(); });
+  joinerPresenceRef.on("value", snapshot => {
+    joinerHasJoined = snapshot.val() === true;
+
+    if (joinerHasJoined) {
+      setStatus("Session in progress");
+    }
+
+    renderExtraTributePanel();
+  });
   } else {
     joinerPresenceRef.onDisconnect().remove().then(() => joinerPresenceRef.set(true)).catch(error => console.warn("Presence update failed", error));
   }
@@ -931,7 +939,7 @@ async function joinRoomByCode(code, token = "") {
     ]);
     const owner = normalizeUsername(ownerSnap.val());
     if (!owner || !stateSnap.exists()) throw new Error("No active trial exists for that room code.");
-    if (Number(resetSnap.val()) > 0) throw new Error("This trial has already been reset. Start a new one.");
+    if (Number(resetSnap.val()) > 0) throw new Error("This session has already been reset. Start a new one.");
     const savedHash = String(tokenSnap.val() || "");
     if (savedHash && (!token || await hashToken(token) !== savedHash)) throw new Error("Fhyra must use the private invitation link, not the room code.");
     attachRoom(cleanCode, "joiner", owner);
@@ -968,7 +976,7 @@ function restoreSavedSession() {
     const name = normalizeUsername(snapshot.val());
     if (!name) { localStorage.removeItem(ACTIVE_SESSION_KEY); return; }
     attachRoom(saved.code, saved.role, name);
-    setStatus("Restored your previous trial.");
+    setStatus("Restored your previous session.");
   }).catch(error => { console.warn("Could not restore previous room:", error); });
   return true;
 }
