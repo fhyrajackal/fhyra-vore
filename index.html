@@ -461,7 +461,7 @@ function renderGame() {
   document.getElementById("chamberPanel").classList.toggle("hidden", !active);
   document.getElementById("initiatorActions").classList.toggle("hidden", !(active && isInitiator));
   document.getElementById("joinerControls").classList.toggle("hidden", !(active && !isInitiator));
-  document.getElementById("gameOverPanel").style.display = gameover ? "block" : "none";
+  document.getElementById("gameOverPanel").classList.toggle("hidden", !gameover);
   document.getElementById("endSection").classList.toggle("hidden", !ended);
   document.getElementById("extraTributeSection").style.display = hasRoom ? "block" : "none";
   document.getElementById("chatBox").style.display = hasRoom ? "block" : "none";
@@ -828,7 +828,7 @@ function attachRoom(code, role, name) {
       ? snapshot.val()
       : null;
 
-    if (gameState && gameState.status === "ended") {
+    if (gameState && ["ended", "gameover"].includes(gameState.status)) {
       setStatus("Session Ended");
     } else if (joinerHasJoined || (gameState && gameState.status === "active")) {
       setStatus("Session in progress");
