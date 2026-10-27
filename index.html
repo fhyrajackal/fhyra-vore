@@ -497,7 +497,7 @@ function renderGame() {
     document.getElementById("chamberTitle").textContent = "Choose their fate";
   } else if (active && route) {
     const chamberName = route.chambers[Math.min(1, Math.max(0, Number(state.chamberIndex)))];
-    document.getElementById("sceneHeading").textContent = `${route.name}: ${chamberName}`;
+    document.getElementById("sceneHeading").textContent = `${route.name}: The ${chamberName}`;
     document.getElementById("sceneText").textContent = Number(state.chamberIndex) === 0
       ? `The first of the prey's predicaments slowly weakens you, tiring you out. You know it's futile, no matter how the goddess decides to use your inferior existence for her hedonistic pleasures, she will first toy with you and then your health and stamina will begin to break down faster, as digestion kicks in. Fhyra alone decides when to swallow the prey towards her ${route.chambers[1]}.`
       : `Inside the ${chamberName}, health and stamina drain faster. Digestion now rises by ${Number(state.digestionRatePer10s ?? 1)} point(s) every 10s within the depths of the goddess' biology.`;
