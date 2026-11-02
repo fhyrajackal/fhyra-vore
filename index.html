@@ -218,6 +218,10 @@
 
   #status { min-height: 1.3rem; text-align: center; color: #efbce8; font-size: 0.9rem; margin: 0.6rem auto; overflow-wrap: anywhere; max-width: 640px; }
   #status:empty { display: none; }
+  #status.error {
+    color: #ffd0da; background: rgba(150, 30, 60, 0.28); border: 1px solid rgba(255, 113, 139, 0.55);
+    border-radius: 12px; padding: 0.6rem 0.85rem; margin: 0 auto 0.85rem;
+  }
 
   /* ---------- Menu ---------- */
   #digestedList { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; padding: 0; margin: 0.6rem 0 0; list-style: none; }
@@ -457,6 +461,8 @@
     <p class="subtitle">Fulfill the real purpose of your existence as my squirmy toy to churn away~</p>
   </header>
 
+  <div id="status" role="status" aria-live="polite"></div>
+
   <section id="mainMenu" class="menu">
     <div class="panel">
       <h2>Offer yourself as tribute.</h2>
@@ -482,8 +488,6 @@
       <div id="digestedDetail" class="hidden" aria-live="polite"></div>
     </div>
   </section>
-
-  <div id="status" role="status" aria-live="polite"></div>
 
   <section id="gameArea" class="hidden">
     <div class="panel topbar" id="roomDisplay">
@@ -829,7 +833,7 @@ const WHISPERS = {
       "She tilts you toward the light with a voracious smirk, never breaking eye contact.",
       "Her lips part, just slightly. You can see how wet the confines of her all-consuming maw are.",
       "'You're shaking,' she grins. 'Good.'",
-      "You're nothing but a snack between her fingers, and you've never felt more vulnerable."
+      "You're nothing but a snack between her fingers, and you've never felt more vulnerable.",
       "Your tiny heartbeat spikes and flutters at her licking her lips."
     ],
     pred: [
@@ -1002,21 +1006,52 @@ let squirm = null; // { endsAt, taps, timer }
 let creatingSession = false;
 let prevStats = null;
 
-const authReady = auth.signInAnonymously().then(() => {
+const AUTH_TIMEOUT_MS = 15000;
+let authErrorMessage = "";
+const authReady = Promise.race([
+  auth.signInAnonymously(),
+  new Promise((_, reject) => setTimeout(() => reject(new Error("auth-timeout")), AUTH_TIMEOUT_MS))
+]).then(() => {
   db.ref(".info/serverTimeOffset").on("value", snapshot => { serverTimeOffset = Number(snapshot.val()) || 0; });
   listenForDigestedUsers();
 }).catch(error => {
   console.error("Anonymous Firebase sign-in failed:", error);
-  setStatus("Firebase sign-in failed. Enable Anonymous sign-in in Firebase Authentication and check your web config.");
+  const code = error && (error.code || error.message);
+  authErrorMessage = (code === "auth-timeout"
+    ? "Couldn't connect to Firebase (sign-in timed out). Check your internet connection, then refresh."
+    : `Firebase sign-in failed (${code || "unknown"}). In the Firebase console, enable Authentication → Sign-in method → Anonymous, and make sure this site's domain is listed under Authentication → Settings → Authorized domains.`);
+  showError(authErrorMessage);
   throw error;
 });
+
+authReady.catch(() => {});
 
 // ======================================================================
 // Small helpers
 // ======================================================================
 const $ = id => document.getElementById(id);
 function getServerNow() { return Date.now() + serverTimeOffset; }
-function setStatus(message) { $("status").textContent = message || ""; }
+function setStatus(message, isError = false) {
+  const el = $("status");
+  el.textContent = message || "";
+  el.classList.toggle("error", !!message && isError);
+  if (message && isError) {
+    if (typeof showToast === "function") showToast(message);
+    try { el.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (_) {}
+  }
+}
+function showError(message) { setStatus(message, true); }
+
+// Any unexpected script error is shown on screen instead of failing silently.
+window.addEventListener("error", event => {
+  console.error(event.error || event.message);
+  showError(`Something went wrong: ${event.message || "unknown error"}. Refresh the page and try again.`);
+});
+window.addEventListener("unhandledrejection", event => {
+  const reason = event.reason;
+  console.error(reason);
+  showError(`Something went wrong: ${(reason && (reason.message || reason.code)) || reason || "unknown error"}.`);
+});
 function normalizeUsername(value) { return String(value || "").replace(/[\u0000-\u001F\u007F]/g, "").trim().replace(/\s+/g, " ").slice(0, 40); }
 function usernameKey(value) {
   const normalized = normalizeUsername(value).toLowerCase();
@@ -2433,8 +2468,16 @@ function returnToMainMenu() {
   renderDigestedList();
 }
 
+function withTimeout(promise, ms, label) {
+  return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error(label)), ms))]);
+}
 async function initiateSession() {
-  if (creatingSession || currentRoomCode) return;
+  if (creatingSession) return;
+  if (currentRoomCode) {
+    // A half-opened room from an earlier failure must never make the button silently do nothing.
+    if (!$("gameArea").classList.contains("hidden")) return;
+    returnToMainMenu();
+  }
   creatingSession = true;
   const button = $("initiateButton");
   setBusy(button, true);
@@ -2442,12 +2485,17 @@ async function initiateSession() {
   finally { creatingSession = false; setBusy(button, false); }
 }
 async function createSession() {
-  try { await authReady; } catch (_) { return; }
   const nameInput = $("initiatorNameInput");
   const name = normalizeUsername(nameInput.value);
-  if (!name) { setStatus("Enter a username first."); nameInput.focus(); return; }
+  if (!name) { showError("Enter a username first, food."); nameInput.focus(); return; }
+  setStatus("Connecting…");
+  try { await authReady; } catch (_) { showError(authErrorMessage || "Couldn't sign in to Firebase. Refresh and try again."); return; }
   try {
-    if (await isUsernameDigested(name)) { setStatus(`“${name}” has already been digested and can never be used again. Choose another name, food.`); return; }
+    if (await withTimeout(isUsernameDigested(name), 15000, "Timed out checking The Digested list. Check your connection.")) {
+      showError(`“${name}” has already been digested and can never be used again. Choose another name, food.`);
+      nameInput.focus(); nameInput.select();
+      return;
+    }
     const code = generateToken();
     const inviteToken = generateToken();
     const tokenHash = await hashToken(inviteToken);
@@ -2458,8 +2506,15 @@ async function createSession() {
     updates[`rooms/${code}/inviteTokenHash`] = tokenHash;
     updates[`rooms/${code}/gameState`] = state;
     updates[`rooms/_inviteTokenIndex/${tokenHash}`] = code;
-    await db.ref().update(updates);
-    attachRoom(code, "initiator", name);
+    await withTimeout(db.ref().update(updates), 15000, "Timed out saving the new session. Check your connection.");
+    try {
+      attachRoom(code, "initiator", name);
+    } catch (attachError) {
+      console.error("Could not open the new room:", attachError);
+      returnToMainMenu();
+      showError(`The session was created but couldn't be opened (${attachError.message || attachError}). Refresh and try again.`);
+      return;
+    }
     const joinLink = `${JOIN_BASE_URL}?invite=${encodeURIComponent(inviteToken)}`;
     const emailConfigured = ![EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, GODDESS_EMAIL_ADDRESS].some(v => !v || v.includes("PASTE_") || v.includes("YOUR_EMAIL"));
     if (!emailConfigured) { setStatus("Sacrifice session created, but email isn't configured yet."); return; }
@@ -2471,11 +2526,14 @@ async function createSession() {
       setStatus("Invitation sent — waiting for Fhyra to come and devour you.");
     } catch (error) {
       console.error("Invitation email failed:", error);
-      setStatus("Session created, but the invitation email failed. Check the EmailJS service, template and allowed domain.");
+      showError("Session created, but the invitation email failed. Check the EmailJS service, template and allowed domain.");
     }
   } catch (error) {
     console.error("Could not create a session:", error);
-    setStatus(error && error.message ? error.message : "Could not create session. Check Firebase setup and permissions.");
+    const code = error && (error.code || "");
+    showError(/permission/i.test(String(code) + String(error && error.message))
+      ? "Firebase refused to save the session (permission denied). Check that your database rules are published."
+      : (error && error.message ? error.message : "Could not create session. Check Firebase setup and permissions."));
   }
 }
 
