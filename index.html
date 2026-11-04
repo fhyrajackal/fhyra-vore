@@ -1492,7 +1492,7 @@ function renderPresence() {
   chip.classList.remove("hidden");
   if (isInitiator) {
     chip.classList.toggle("online", joinerHasJoined);
-    $("presenceText").textContent = joinerHasJoined ? "Fhyra is here" : "Waiting for Fhyra";
+    $("presenceText").textContent = joinerHasJoined ? "In Fhyra's presence" : "Waiting for Fhyra";
   } else {
     chip.classList.add("online");
     $("presenceText").textContent = "Your food is waiting";
@@ -2667,5 +2667,62 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) tick
 window.addEventListener("pageshow", () => { if (!document.hidden) tickGame(); });
 window.addEventListener("online", () => { if (!document.hidden) tickGame(); });
 </script>
+<!-- ===================================================================
+     ADD-ON: entry tribute button + 72h invitation expiry.
+     Everything above this block is the original game, unchanged.
+     =================================================================== -->
+<style>
+  #plEntryTribute { margin-top: 0.9rem; text-align: center; }
+  #plEntryTribute .split { margin-top: 0.5rem; }
+  #plEntryTributeText { margin: 0.6rem 0 0; font-family: var(--display); font-style: italic; font-size: 1.08rem; color: #f3bfe8; }
+</style>
+<script>
+"use strict";
+(function () {
+// ---- Entry tribute: shown to the preything while they wait for Fhyra to join.
+$("waitingText").insertAdjacentHTML("afterend", `
+  <div id="plEntryTribute" class="hidden">
+    <button id="plEntryTributeButton" class="gold" type="button">Pay Tribute ($50)</button>
+    <div class="split hidden" id="plEntryTributeLinks">
+      <a class="btn btn-paypal" href="https://paypal.me/fhyrapaypal/50.00" target="_blank" rel="noopener">PayPal</a>
+      <a class="btn btn-throne" href="https://throne.com/fhyrajackal" target="_blank" rel="noopener">Throne</a>
+    </div>
+    <p id="plEntryTributeText">Once you've worshipfully shown commitment, Fhyra will grace you with her presence, and the session will begin.</p>
+  </div>`);
+$("plEntryTributeButton").addEventListener("click", () => {
+  $("plEntryTributeLinks").classList.remove("hidden");
+  $("plEntryTributeButton").classList.add("hidden");
+});
+const _renderGame = renderGame;
+renderGame = function () {
+  _renderGame();
+  const waitingForFhyra = !!currentRoomCode && isInitiator && !joinerHasJoined && !!gameState && gameState.status === "waiting";
+  $("plEntryTribute").classList.toggle("hidden", !waitingForFhyra);
+};
+
+// ---- Invitation links expire 72h after the session was created, unless the session has already started.
+const INVITE_TTL_MS = 72 * 60 * 60 * 1000;
+const _joinRoomByInviteToken = joinRoomByInviteToken;
+joinRoomByInviteToken = async function (token) {
+  try {
+    await authReady;
+    const tokenHash = await hashToken(String(token || "").trim());
+    const code = String((await db.ref("rooms/_inviteTokenIndex/" + tokenHash).once("value")).val() || "").toLowerCase();
+    if (ROOM_CODE_PATTERN.test(code)) {
+      const state = (await db.ref("rooms/" + code + "/gameState").once("value")).val();
+      const createdAt = num(state && state.createdAt);
+      const neverStarted = !!state && !num(state.activeAt);
+      if (createdAt && neverStarted && getServerNow() - createdAt > INVITE_TTL_MS) {
+        if (window.location.search) history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        setStatus("This invitation has expired. Invitations are only valid for 72 hours.");
+        return;
+      }
+    }
+  } catch (error) { console.warn("Could not check the invitation's age:", error); }
+  return _joinRoomByInviteToken(token);
+};
+})();
+</script>
+
 </body>
 </html>
