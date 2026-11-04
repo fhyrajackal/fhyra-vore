@@ -1398,7 +1398,7 @@ function renderGame() {
   const prey = preyName(state);
 
   // --- top bar
-  $("roleLabel").textContent = isInitiator ? "🫧 Fhyra's preything" : "👑 Fhyra — the Goddess";
+  $("roleLabel").textContent = isInitiator ? "🦊 Fhyra's preything" : "👑 Fhyra — the Goddess";
   $("usernameLabel").textContent = isInitiator ? `You are: ${initiatorName}` : `Your food: ${prey}`;
   $("endButtonContainer").classList.toggle("hidden", isInitiator);
   $("endSessionButton").classList.toggle("hidden", !(active || waiting));
